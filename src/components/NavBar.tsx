@@ -9,7 +9,7 @@ export const NavBar = () => {
                 <HomeButton></HomeButton>
                 <section className="d-flex">
                     <BuildButton></BuildButton>
-                    <LoginButton></LoginButton>
+                    {/* <LoginButton></LoginButton> */}
                 </section>
             </section>
         </section>

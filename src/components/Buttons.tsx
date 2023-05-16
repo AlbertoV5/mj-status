@@ -3,14 +3,14 @@ import React from 'react'
 export const HomeButton = () => {
     return (
         <span className="navbar-brand">
-            <a className='btn btn-outline-light me-2' href='/'>Promptry</a>
+            <a className='btn btn-outline-light me-2' href='/'>Home</a>
         </span>
     )
 }
 export const BuildButton = () => {
     return (
         <a className="btn btn-outline-light me-2" href="/build">
-            Build
+            Stats
         </a>
     )
 }
