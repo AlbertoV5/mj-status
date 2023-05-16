@@ -1,0 +1,40 @@
+// Import Bootstrap and its default variables
+// @import 'bootstrap/scss/bootstrap.scss';
+
+$primary: #8cc9dc;
+$danger: #e97e90;
+$success: #72cea3;
+$black: #1a1a1a;
+$dark: #222327;
+
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+
+.output-text {
+    height: 45vh;
+}
+.button-fix {
+    padding-bottom: 8px;
+}
+@include media-breakpoint-up(sm) {
+    .output-text {
+        height: 40vh;
+    }
+}
+@include media-breakpoint-up(md) {
+    .output-text {
+        height: 35vh;
+    }
+}
+@include media-breakpoint-up(lg) {
+    .output-text {
+        height: 30vh;
+    }
+    .button-fix {
+        padding-bottom: 0px;
+    }
+}
+@include media-breakpoint-up(xl) {
+    .output-text {
+        height: 25vh;
+    }
+}
