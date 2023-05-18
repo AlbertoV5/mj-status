@@ -2,45 +2,60 @@ import { useEffect, useState, useRef } from 'react'
 import * as d3 from "d3";
 import { getYesterdayData, Key, testKey, colors, keyLabels } from "./util";
 
+interface BaseProps {
+    refBase: React.RefObject<SVGSVGElement>,
+    margin: {top: number, right: number, bottom: number, left: number},
+    dimensions: {width: number, height: number}
+}
+
+const Base = ({refBase, margin, dimensions}: BaseProps) => {
+    return (
+        <section id='dataviz'>
+            <svg
+                width={dimensions.width + margin.left + margin.right} 
+                height={dimensions.height  + margin.top + margin.bottom}
+            >
+                <g 
+                    ref={refBase} 
+                    transform={`translate(${margin.left},${margin.top})`}
+                ></g>
+            </svg>
+        </section>
+    )
+}
+
 export default function Chart() {
     
     const ref = useRef<HTMLDivElement>(null);
+    const refChild = useRef<SVGSVGElement>(null);
     const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => 
         keyLabels.map(({key}) => ({key, sel: key === testKey})
     ));
+    const margin = {top: 10, right: 30, bottom: 30, left: 60};
+    const dimensions = {width: 900 - margin.left - margin.right, height: 400 - margin.top - margin.bottom}
+
     useEffect(() => {
         const utc = new Date().getTimezoneOffset() * 60000;
         const today = new Date().getTime() - utc;
         const yesterday = today - 24 * 60 * 60 * 1000;
         const minutes15 = 15 * 60 * 1000;
-        // Plot
-        const elementId = "#dataviz";
-        // TODO: Finish implementation
-        const margin = {top: 10, right: 30, bottom: 30, left: 60},
-        width = 900 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
-        // Append the svg object to the body of the page
-        const svg = d3.select(elementId)
-        .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`);
+        if (!refChild.current) return;
+        const svg = d3.select(refChild.current);
         //Read the data
         getYesterdayData()
         .then((allData: Record<Key, number[]>) => {
             // Create X axis
             const xAxis = d3.scaleTime()
             .domain([yesterday, today])
-            .range([ 0, width ]);
+            .range([ 0, dimensions.width ]);
             // Add X axis
             svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
+            .attr("transform", "translate(0," + dimensions.height + ")")
             .call(d3.axisBottom(xAxis).tickFormat(d3.timeFormat("%H:%M") as any))
             // Create Y axis
             const yAxis = d3.scaleLinear()
             .domain( [0, 10.0] )
-            .range([ height, 0 ]);
+            .range([ dimensions.height, 0 ]);
             // Add Y axis
             svg.append("g")
             .call(d3.axisLeft(yAxis));
@@ -115,6 +130,7 @@ export default function Chart() {
     return (
         <section className='container-fluid'>
             <section className='row' id="dataviz" ref={ref}></section>
+            <Base refBase={refChild} margin={margin} dimensions={dimensions}></Base>
             <section className='row'>
                 <ul className='list-group'>
                 {
