@@ -66,6 +66,8 @@ const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
     return yAxis;
 }
 
+const references: {key: Key, refs: any[]}[] = keyLabels.map(({key}) => ({key: key as Key, refs: [] as any[]}));
+
 export default function Chart() {
     
     const refChild = useRef<SVGSVGElement>(null);
@@ -91,18 +93,25 @@ export default function Chart() {
         getYesterdayData()
         .then((allData: Record<Key, number[]>) => {
             // Data
+            console.log(references);
             selected.forEach(({key, sel}) => {
-                if (!sel) return;
+                if (!sel) {
+                    // remove references if not selected
+                    references.find(({key: k}) => k === key)?.refs.forEach((r) => r.remove());
+                    return;
+                };
                 const values = allData[key as Key];
                 const data = values.map((value, i) => ([yesterday + (i * minutes15), value]))
                 // Group
-                svg.selectAll("myDots")
+                const dots = svg.selectAll("myDots")
                     .data(data)
                     .enter()
                     .append('g')
                     .style("fill", colors[key as Key])
+                ;
+                references.find(({key: k}) => k === key)?.refs.push(dots);
                 // Add the line
-                svg.append("path")
+                const line = svg.append("path")
                     .datum(data)
                     .attr("fill", "none")
                     .attr("stroke", colors[key as Key])
@@ -111,6 +120,8 @@ export default function Chart() {
                         .curve(d3.curveBasis)
                         .x(([x, y]) => xAxis(x)).y(([x, y]) => yAxis(y)) as any
                     )
+                ;
+                references.find(({key: k}) => k === key)?.refs.push(line);
                 // Points
                 const plotPoints = svg
                     .append("g")
@@ -122,6 +133,8 @@ export default function Chart() {
                         .attr("r", 5)
                         .attr("fill", colors[key as Key])
                         .attr("stroke", "black")
+                ;
+                references.find(({key: k}) => k === key)?.refs.push(plotPoints);
                 // Tooltip
                 const tooltip = d3.select("body")
                     .append("div")
@@ -130,6 +143,7 @@ export default function Chart() {
                     .style("position", "absolute")
                     .style("padding", "8px")
                     .style("pointer-events", "none")
+                ;
                 // Mouseover
                 plotPoints.on("mouseover", (event: PointerEvent, d: any) => {
                     const hourMinutes = new Date(d[0]).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'});
@@ -147,6 +161,8 @@ export default function Chart() {
             })
         })
         return () => {
+            // useSetReferences((prev) => prev.map((p) => ({...p, refs: []})))
+            // svg.selectAll("path").remove();
         }
     }, [selected])
 
@@ -161,18 +177,23 @@ export default function Chart() {
             <section className='row'>
                 <div >
                 {
-                    keyLabels.map(({key, label}) => (
-                        <div key={key} className='form-check'>
+                    keyLabels.map(({key: k, label}) => (
+                        <div key={k} className='form-check'>
                             <input 
                                 className='form-check-input' 
                                 type='checkbox'
-                                value=""
-                                onChange={() => {
+                                onChange={(e) => {
                                     setSelected((prev) => {
-                                        return prev.map(({key, sel}) => ({key, sel: key === key}));
+                                        const newSelected = prev.map((s) => {
+                                            if (s.key === k) {
+                                                return {...s, sel: !s.sel}
+                                            }
+                                            return s;
+                                        });
+                                        return newSelected;
                                     });
                                 }}
-                                checked={selected.find(({key}) => key === key)?.sel === true}
+                                checked={selected.find(({key}) => key === k)?.sel}
                             />
                             <label
                                 className='form-check-label'
