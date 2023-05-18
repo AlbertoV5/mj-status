@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import * as d3 from "d3";
-import { getYesterdayData, Key, testKey, colors } from "./util";
+import { getYesterdayData, Key, testKey, colors, keyLabels } from "./util";
 
 export default function Chart() {
-
-    const [selected, setSelected] = React.useState<{key:string, sel: boolean}[]>([
-        {key: testKey, sel: true}
-    ]);
     
+    const ref = useRef<HTMLDivElement>(null);
+    const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => 
+        keyLabels.map(({key}) => ({key, sel: key === testKey})
+    ));
     useEffect(() => {
         const utc = new Date().getTimezoneOffset() * 60000;
         const today = new Date().getTime() - utc;
@@ -29,26 +29,35 @@ export default function Chart() {
         //Read the data
         getYesterdayData()
         .then((allData: Record<Key, number[]>) => {
+            // Create X axis
+            const xAxis = d3.scaleTime()
+            .domain([yesterday, today])
+            .range([ 0, width ]);
+            // Add X axis
+            svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(xAxis).tickFormat(d3.timeFormat("%H:%M") as any))
+            // Create Y axis
+            const yAxis = d3.scaleLinear()
+            .domain( [0, 10.0] )
+            .range([ height, 0 ]);
+            // Add Y axis
+            svg.append("g")
+            .call(d3.axisLeft(yAxis));
             // Data
-            console.log(selected);
             selected.forEach(({key, sel}) => {
+                if (!sel) return;
+                console.log(key);
                 const values = allData[key as Key];
                 const data = values.map((value, i) => ([yesterday + (i * minutes15), value]))
-                // Create X axis
-                const xAxis = d3.scaleTime()
-                .domain([yesterday, today])
-                .range([ 0, width ]);
-                // Add X axis
-                svg.append("g")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(xAxis).tickFormat(d3.timeFormat("%H:%M") as any))
-                // Create Y axis
-                const yAxis = d3.scaleLinear()
-                .domain( [0, Math.max(...values)] )
-                .range([ height, 0 ]);
-                // Add Y axis
-                svg.append("g")
-                .call(d3.axisLeft(yAxis));
+                // group
+                svg
+                .selectAll("myDots")
+                .data(data)
+                .enter()
+                  .append('g')
+                  .style("fill", colors[key as Key])
+
                 // Add the line
                 svg.append("path")
                 .datum(data)
@@ -60,14 +69,7 @@ export default function Chart() {
                     .x(([x, y]) => xAxis(x)).y(([x, y]) => yAxis(y)) as any
                 )
 
-                const tooltip = d3.select("body")
-                .append("div")
-                .attr("class", "bg-dark")
-                .style("opacity", 0)
-                .style("position", "absolute")
-                .style("padding", "8px")
-                .style("pointer-events", "none")
-
+                // Points
                 const plotPoints = svg
                 .append("g")
                 .selectAll("dot")
@@ -78,6 +80,15 @@ export default function Chart() {
                     .attr("r", 5)
                     .attr("fill", colors[key as Key])
                     .attr("stroke", "black")
+
+                // Tooltip
+                const tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "bg-dark")
+                .style("opacity", 0)
+                .style("position", "absolute")
+                .style("padding", "8px")
+                .style("pointer-events", "none")
                 
                 plotPoints.on("mouseover", (event: PointerEvent, d: any) => {
                     const hourMinutes = new Date(d[0]).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'});
@@ -94,10 +105,36 @@ export default function Chart() {
                 });
             })
         })
-    }, [])
-    
+        return () => {
+            if (ref.current) {
+                ref.current.children[0].remove();
+            }
+        }
+    }, [selected])
 
     return (
-        <section id="dataviz"></section>
+        <section className='container-fluid'>
+            <section className='row' id="dataviz" ref={ref}></section>
+            <section className='row'>
+                <ul className='list-group'>
+                {
+                    keyLabels.map(({key, label}) => (
+                        <li className='list-group-item' key={key} onClick={() => {
+                            setSelected((prev) => {
+                                console.log('hi')
+                                const newSelected = prev.map((s) => {
+                                    if (s.key === key) {
+                                        return {...s, sel: !s.sel}
+                                    }
+                                    return s;
+                                });
+                                return newSelected;
+                            });
+                        }}>{label}</li>
+                    ))
+                }
+                </ul>
+            </section>
+        </section>
     )
 }
