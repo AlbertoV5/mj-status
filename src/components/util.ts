@@ -2,6 +2,14 @@ import * as d3 from "d3";
 
 export type PlotDatum = [number, number];
 export type Key = "kdpt_diffusion_anime" | "v4_anime_upscaler" | "v4_diffusion" | "v4_upscaler" | "v5_diffusion" | "v5_diffusion_anime";
+export const colors = {
+    "kdpt_diffusion_anime": "#F9DF74",
+    "v4_anime_upscaler": "#EDAE49",
+    "v4_diffusion": "#4DA167",
+    "v4_upscaler": "#3BC14A",
+    "v5_diffusion": "#A6D9F7",
+    "v5_diffusion_anime": "#84DCCF",
+}
 export const testKey = 'v5_diffusion_anime';
 
 /** Returns data based on date. */
