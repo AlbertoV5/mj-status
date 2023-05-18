@@ -1,21 +1,23 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Card from '../components/Card.astro';
+import Chart from "../components/Chart"
 ---
 
-<!-- Load Data -->
-<script src="../scripts/stats.ts"></script>
+<style is:global>
+.tooltip {
+	position: absolute;
+	padding: 8px;
+	pointer-events: none; /* Ensure the tooltip doesn't interfere with mouse events on plot points */
+}
+</style>
 
 <Layout title="Welcome to Astro.">
-	<main class="container-fluid">
+	<main class="container-fluid px-4">
+		<header class="row">
+			<h1>Stats</h1>
+		</header>
 		<section class="row">
-			<section id="test"></section>
-		</section>
-		<section class="row">
-			2
-		</section>
-		<section class="row">
-			3
+			<Chart client:only></Chart>
 		</section>
 	</main>
 </Layout>
