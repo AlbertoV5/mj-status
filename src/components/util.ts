@@ -21,7 +21,7 @@ export const colors = {
 export const testKey = 'v5_diffusion_anime';
 
 /** Returns data based on date. */
-export async function getYesterdayData(path: string = "../metrics/relax"): Promise<Record<Key, number[]>>{
+export async function getYesterdayData(path: string = "./metrics/relax"): Promise<Record<Key, number[]>>{
     const day = new Date().getUTCDate();
     const month = (new Date().getUTCMonth() + 1).toFixed(0).padStart(2, '0');
     const year = new Date().getUTCFullYear();
