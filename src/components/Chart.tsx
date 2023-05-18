@@ -1,6 +1,6 @@
+import { getYesterdayData, Key, testKey, colors, keyLabels } from "./util";
 import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import * as d3 from "d3";
-import { getYesterdayData, Key, testKey, colors, keyLabels } from "./util";
 
 interface BaseProps {
     refBase: React.RefObject<SVGSVGElement>,
@@ -28,10 +28,6 @@ const Base = ({refBase, margin, dimensions, children}: BaseProps) => {
 }
 
 const LayoutXAxis = ({x, dimensions}: {x: d3.ScaleTime<number, number>, dimensions: {width: number, height: number}}) => {
-    // svg.append("g")
-    // .attr("transform", "translate(0," + dimensions.height + ")")
-    // .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%H:%M") as any))
-
     const ref = useRef<SVGSVGElement>(null);
     useLayoutEffect(() => {
         if (!ref.current) return;
@@ -76,8 +72,10 @@ export default function Chart() {
     const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => 
         keyLabels.map(({key}) => ({key, sel: key === testKey})
     ));
+    // dimensions
     const margin = {top: 10, right: 30, bottom: 30, left: 60};
     const dimensions = {width: 900 - margin.left - margin.right, height: 400 - margin.top - margin.bottom}
+    // time
     const utc = new Date().getTimezoneOffset() * 60000;
     const today = new Date().getTime() - utc;
     const yesterday = today - 24 * 60 * 60 * 1000;
@@ -85,7 +83,7 @@ export default function Chart() {
     // axis
     const xAxis = getXAxis(yesterday, today, dimensions);
     const yAxis = getYAxis(10.0, dimensions);
-
+    // effect
     useEffect(() => {
         if (!refChild.current) return;
         const svg = d3.select(refChild.current);
@@ -95,7 +93,6 @@ export default function Chart() {
             // Data
             selected.forEach(({key, sel}) => {
                 if (!sel) return;
-                console.log(key);
                 const values = allData[key as Key];
                 const data = values.map((value, i) => ([yesterday + (i * minutes15), value]))
                 // Group
@@ -162,24 +159,28 @@ export default function Chart() {
                 </>
             </Base>
             <section className='row'>
-                <ul className='list-group'>
+                <div >
                 {
                     keyLabels.map(({key, label}) => (
-                        <li className='list-group-item' key={key} onClick={() => {
-                            setSelected((prev) => {
-                                console.log('hi')
-                                const newSelected = prev.map((s) => {
-                                    if (s.key === key) {
-                                        return {...s, sel: !s.sel}
-                                    }
-                                    return s;
-                                });
-                                return newSelected;
-                            });
-                        }}>{label}</li>
+                        <div key={key} className='form-check'>
+                            <input 
+                                className='form-check-input' 
+                                type='checkbox'
+                                value=""
+                                onChange={() => {
+                                    setSelected((prev) => {
+                                        return prev.map(({key, sel}) => ({key, sel: key === key}));
+                                    });
+                                }}
+                                checked={selected.find(({key}) => key === key)?.sel === true}
+                            />
+                            <label
+                                className='form-check-label'
+                            >{label}</label>
+                        </div>
                     ))
                 }
-                </ul>
+                </div>
             </section>
         </section>
     )
