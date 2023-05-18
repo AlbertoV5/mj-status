@@ -69,13 +69,12 @@ const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
 const references: {key: Key, refs: any[]}[] = keyLabels.map(({key}) => ({key: key as Key, refs: [] as any[]}));
 
 export default function Chart() {
-    
     const refChild = useRef<SVGSVGElement>(null);
     const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => 
         keyLabels.map(({key}) => ({key, sel: key === testKey})
     ));
     // dimensions
-    const margin = {top: 10, right: 30, bottom: 30, left: 60};
+    const margin = {top: 10, right: 30, bottom: 30, left: 30};
     const dimensions = {width: 900 - margin.left - margin.right, height: 400 - margin.top - margin.bottom}
     // time
     const utc = new Date().getTimezoneOffset() * 60000;
@@ -86,14 +85,13 @@ export default function Chart() {
     const xAxis = getXAxis(yesterday, today, dimensions);
     const yAxis = getYAxis(10.0, dimensions);
     // effect
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!refChild.current) return;
         const svg = d3.select(refChild.current);
         // data
         getYesterdayData()
         .then((allData: Record<Key, number[]>) => {
             // Data
-            console.log(references);
             selected.forEach(({key, sel}) => {
                 if (!sel) {
                     // remove references if not selected
@@ -117,7 +115,7 @@ export default function Chart() {
                     .attr("stroke", colors[key as Key])
                     .attr("stroke-width", 1.5)
                     .attr("d", d3.line()
-                        .curve(d3.curveBasis)
+                        // .curve(d3.curveBasis)
                         .x(([x, y]) => xAxis(x)).y(([x, y]) => yAxis(y)) as any
                     )
                 ;
@@ -167,18 +165,18 @@ export default function Chart() {
     }, [selected])
 
     return (
-        <section className='container-fluid'>
-            <Base refBase={refChild} margin={margin} dimensions={dimensions}>
-                <>
-                    <LayoutXAxis x={xAxis} dimensions={dimensions} />
-                    <LayoutYAxis y={yAxis} dimensions={dimensions} />
-                </>
-            </Base>
+        <section className='container'>
             <section className='row'>
-                <div >
+                <div className="col-12">
+                    <Base refBase={refChild} margin={margin} dimensions={dimensions}>
+                        <>
+                            <LayoutXAxis x={xAxis} dimensions={dimensions} />
+                            <LayoutYAxis y={yAxis} dimensions={dimensions} />
+                        </>
+                    </Base>
                 {
                     keyLabels.map(({key: k, label}) => (
-                        <div key={k} className='form-check'>
+                        <div key={k} className='form-check form-check-inline'>
                             <input 
                                 className='form-check-input' 
                                 type='checkbox'

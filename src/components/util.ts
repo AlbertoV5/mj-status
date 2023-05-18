@@ -4,10 +4,10 @@ export type PlotDatum = [number, number];
 export type Key = "kdpt_diffusion_anime" | "v4_anime_upscaler" | "v4_diffusion" | "v4_upscaler" | "v5_diffusion" | "v5_diffusion_anime";
 export const keyLabels = [
     {key:  "kdpt_diffusion_anime", label: "V4 Anime"},
-    {key:  "v4_anime_upscaler", label: "V4 Anime Upscaler"},
-    {key:  "v4_diffusion", label: "V4"},
+    {key:  "v4_anime_upscaler", label: "V4 AnimUp"},
+    {key:  "v4_diffusion", label: "V4 Diffusion"},
     {key:  "v4_upscaler", label: "V4 Upscaler"},
-    {key:  "v5_diffusion", label: "V5"},
+    {key:  "v5_diffusion", label: "V5 Diffusion"},
     {key:  "v5_diffusion_anime", label: "V5 Anime"}
 ]
 export const colors = {
