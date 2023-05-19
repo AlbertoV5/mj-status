@@ -35,6 +35,7 @@ const LayoutXAxis = ({x, dimensions}: {x: d3.ScaleTime<number, number>, dimensio
         d3.select(ref.current)
             .attr("transform", "translate(0," + dimensions.height + ")")
             .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%H:%M") as any))
+            .style("font", "14px sans-serif")
     }, []);
     return (
         <g ref={ref}></g>
@@ -46,7 +47,8 @@ const LayoutYAxis = ({y, dimensions}: {y: d3.ScaleLinear<number, number>, dimens
     useLayoutEffect(() => {
         if (!ref.current) return;
         d3.select(ref.current)
-        .call(d3.axisLeft(y));
+        .call(d3.axisLeft(y))
+        .style("font", "14px sans-serif")
     }, [])
     return (
         <g ref={ref}></g>
@@ -82,10 +84,11 @@ export default function Chart() {
     const dimensions = {width: width * 0.66 - margin.left - margin.right, height: height * 0.66 - margin.top - margin.bottom}
     // time
     const utc = new Date().getTimezoneOffset() * 60000;
-    const today = new Date().getTime() - utc;
+    const today = new Date().setHours(0, 0, 0, 0) - utc;
     const yesterday = today - 24 * 60 * 60 * 1000;
     const minutes15 = 15 * 60 * 1000;
     // axis
+    console.log(today, yesterday)
     const xAxis = getXAxis(yesterday, today, dimensions);
     const yAxis = getYAxis(10.0, dimensions);
     useEffect(() => {
