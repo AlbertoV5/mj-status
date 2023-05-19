@@ -34,8 +34,13 @@ const LayoutXAxis = ({x, dimensions}: {x: d3.ScaleTime<number, number>, dimensio
         if (!ref.current) return;
         d3.select(ref.current)
             .attr("transform", "translate(0," + dimensions.height + ")")
-            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%H:%M") as any))
+            .call(
+                d3.axisBottom(x)
+                .ticks(10)
+                .tickFormat(d3.timeFormat("%H:%M") as any)
+            )
             .style("font", "14px sans-serif")
+        ;
     }, []);
     return (
         <g ref={ref}></g>
@@ -49,6 +54,9 @@ const LayoutYAxis = ({y, dimensions}: {y: d3.ScaleLinear<number, number>, dimens
         d3.select(ref.current)
         .call(d3.axisLeft(y))
         .style("font", "14px sans-serif")
+        ;
+        const t = d3.select('.tick')
+        t.remove();
     }, [])
     return (
         <g ref={ref}></g>
@@ -88,7 +96,6 @@ export default function Chart() {
     const yesterday = today - 24 * 60 * 60 * 1000;
     const minutes15 = 15 * 60 * 1000;
     // axis
-    console.log(today, yesterday)
     const xAxis = getXAxis(yesterday, today, dimensions);
     const yAxis = getYAxis(10.0, dimensions);
     useEffect(() => {
@@ -124,7 +131,7 @@ export default function Chart() {
                 .datum(data)
                 .attr("fill", "none")
                 .attr("stroke", colors[key as Key])
-                .attr("stroke-width", 1.5)
+                .attr("stroke-width", 2)
                 .attr("d", d3.line()
                 // .curve(d3.curveBasis)
                 .x(([x, y]) => xAxis(x)).y(([x, y]) => yAxis(y)) as any)
@@ -138,7 +145,7 @@ export default function Chart() {
                 .join("circle")
                     .attr("cx", ([x, y]) => xAxis(x))
                     .attr("cy", ([x, y]) => yAxis(y))
-                    .attr("r", 5)
+                    .attr("r", 6)
                     .attr("fill", colors[key as Key])
                     .attr("stroke", "black")
             ;
@@ -178,7 +185,7 @@ export default function Chart() {
             <section className="col-2 px-2 vstack gap-2">
             {
                 keyLabels.map(({key: k, label}) => (
-                    <div key={k} className='form-check form-check-inline'>
+                    <div key={k} className='form-check form-check-inline hstack gap-2'>
                         <input 
                             className='btn-check' 
                             id={`btn-check-${k}`}
@@ -200,6 +207,7 @@ export default function Chart() {
                             className='btn btn-outline-primary'
                             htmlFor={`btn-check-${k}`}
                         >{label}</label>
+                        <div style={{width: '15px', height: '15px', borderRadius: '50%', backgroundColor: colors[k as Key]}}></div>
                     </div>
                 ))
             }
@@ -227,8 +235,8 @@ export default function Chart() {
             <div className="col-10">
                 <Base refBase={refChild} margin={margin} dimensions={dimensions}>
                     <>
-                        <LayoutXAxis x={xAxis} dimensions={dimensions} />
                         <LayoutYAxis y={yAxis} dimensions={dimensions} />
+                        <LayoutXAxis x={xAxis} dimensions={dimensions} />
                     </>
                 </Base>
             </div>
