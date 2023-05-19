@@ -30,6 +30,8 @@ export async function getYesterdayData(path: string = "./metrics/relax"): Promis
     const data = await d3.json(dataURL);
     if (!data){
         // TODO: throw error
+        console.log('Failed to load data.')
+        throw new Error('Failed to load data.');
     }
     return data as Record<Key, number[]>;
 }

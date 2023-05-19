@@ -12,9 +12,10 @@ import Chart from "../components/Chart"
 </style>
 
 <Layout title="Welcome to Astro.">
-	<main class="container-fluid px-4">
+	<main class="container-fluid px-4 vstack gap-4">
 		<header class="row">
 			<h1>Stats</h1>
+			<p>Average wait times.</p>
 		</header>
 		<section class="row">
 			<Chart client:only></Chart>
