@@ -16,13 +16,13 @@ import Chart from "../../../components/stats/Chart"
 </style>
 
 <Layout title="Promptry">
-	<main class="container-fluid px-4 vstack gap-4">
-		<header class="row">
-			<h1>Stats</h1>
-			<p>Average wait times.</p>
+	<main class="container-fluid vstack gap-2">
+		<header class="container">
+			<section class="row">
+				<h1>Stats</h1>
+				<p>Average wait times for relax.</p>
+			</section>
 		</header>
-		<section class="row">
-			<Chart client:only></Chart>
-		</section>
+		<Chart client:only></Chart>
 	</main>
 </Layout>

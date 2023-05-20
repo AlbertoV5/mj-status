@@ -9,7 +9,7 @@ export const HomeButton = () => {
 }
 export const BuildButton = () => {
     return (
-        <a className="btn btn-outline-light me-2" href="/build">
+        <a className="btn btn-outline-light me-2" href="/stats/mj">
             Stats
         </a>
     )

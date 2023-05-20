@@ -1,4 +1,4 @@
-import { getChartData, testCloudFront, Key, testKey, colors, keyLabels } from "./util";
+import { getChartData, Key, testKey, colors, keyLabels } from "./util";
 import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import useWindowDimensions from "./useWindowDimensions";
 import * as d3 from "d3";
@@ -10,24 +10,23 @@ interface BaseProps {
     children:  React.ReactNode
 }
 
+const BreakPointRatio = 1.6;
+
 const Base = ({refBase, margin, dimensions, children}: BaseProps) => {
     return (
-        <section id='dataviz'>
-            <svg
-                width={dimensions.width + margin.left + margin.right} 
-                height={dimensions.height  + margin.top + margin.bottom}
+        <svg
+            width={dimensions.width + margin.left + margin.right} 
+            height={dimensions.height  + margin.top + margin.bottom}
+        >
+            <g 
+                ref={refBase}
+                transform={`translate(${margin.left},${margin.top})`}
             >
-                <g 
-                    ref={refBase}
-                    transform={`translate(${margin.left},${margin.top})`}
-                >
-                    {children}
-                </g>
-            </svg>
-        </section>
+                {children}
+            </g>
+        </svg>
     )
 }
-
 
 const LayoutXAxis = ({x, dimensions}: {x: d3.ScaleTime<number, number>, dimensions: {width: number, height: number}}) => {
     const ref = useRef<SVGSVGElement>(null);
@@ -37,7 +36,7 @@ const LayoutXAxis = ({x, dimensions}: {x: d3.ScaleTime<number, number>, dimensio
             .attr("transform", "translate(0," + dimensions.height + ")")
             .call(
                 d3.axisBottom(x)
-                .ticks(10)
+                .ticks(dimensions.width / dimensions.height >= BreakPointRatio ? 10 : 5)
                 .tickFormat(d3.timeFormat("%H:%M") as any)
             )
             .style("font", "14px sans-serif")
@@ -86,7 +85,7 @@ const TimeLine = ({x2, y2}: {x2: number, y2: number}) => {
 
 const getXAxis = (yesterday: number, today: number, dimensions: {width: number, height: number}) => {
     const xAxis = d3.scaleTime()
-    .domain([yesterday, today])
+    .domain([yesterday, today - minutes15])
     .range([ 0, dimensions.width ]);
     return xAxis;
 }
@@ -98,6 +97,15 @@ const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
     return yAxis;
 }
 
+// absolutes
+const utc = new Date().getTimezoneOffset() * 60000;
+const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
+const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
+// for timeline
+const now = new Date().getTime();
+const nowYesterday = (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
+const minutes15 = 15 * 60 * 1000;
+// const
 const references: {key: Key, refs: any[]}[] = keyLabels.map(({key}) => ({key: key as Key, refs: [] as any[]}));
 const YLIMIT = 10;
 
@@ -107,30 +115,23 @@ export default function Chart() {
         keyLabels.map(({key}) => ({key, sel: key === testKey})
     ));
     const [allData, setAllData] = useState<Record<Key, number[]> | undefined>(undefined);
-    const [date, setDate] = useState<string | undefined>(undefined);
+    const [dates, setDates] = useState<{yesterday: string | undefined, kind: string | undefined}>({yesterday: undefined, kind: undefined});
     // dimensions
-    const margin = {top: 10, right: 30, bottom: 30, left: 30};
     const {width, height} = useWindowDimensions();
-    const dimensions = {width: width * 0.66 - margin.left - margin.right, height: height * 0.66 - margin.top - margin.bottom}
+    const margin = {top: 30, right: height > width ? 20 : 40, bottom: 30, left: height > width ? 20 : 40};
+    const dimensions = {width: (width * 1) - margin.left - margin.right, height: height * 0.6 - margin.top - margin.bottom}
     // time
-    const utc = new Date().getTimezoneOffset() * 60000;
-    const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
-    const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
-    // const nowYesterday = new Date().getTime() - 24 * 60 * 60 * 1000;
-    const now = new Date().getTime();
-    const nowYesterday = (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
-    const minutes15 = 15 * 60 * 1000;
+
     // axis
     const xAxis = getXAxis(startOfYesterday, startOfToday, dimensions);
     const yAxis = getYAxis(YLIMIT, dimensions);
     useEffect(() => {
         getChartData()
-        .then(({data, date}) => {
+        .then(({data, yesterday, kind}) => {
             setAllData(data);
-            setDate(date);
+            setDates({yesterday, kind});
             setSelected(keyLabels.map(({key}) => ({key, sel: key === testKey})))
         });
-        testCloudFront();
     }, [])
     // effect
     useLayoutEffect(() => {
@@ -138,13 +139,31 @@ export default function Chart() {
         const svg = d3.select(refChild.current);
         // query data from selected
         selected.forEach(({key, sel}) => {
-            if (!sel) {
-                // remove references if not selected
-                references.find(({key: k}) => k === key)?.refs.forEach((r) => r.remove());
-                return;
-            };
+            // remove all references regardless if selected or not
+            references.find(({key: k}) => k === key)?.refs.forEach((r) => r.remove());
+            // don't draw if not selected
+            if (!sel) return;
+            // det data using the selected key
             const values = allData[key as Key];
             const data = values.map((value, i) => ([startOfYesterday + (i * minutes15), value]))
+            // D3
+            // add the area
+            const area = svg.append("path")
+                .data([data])
+                .attr("class", "area")
+                .attr("fill", colors[key as Key])
+                .attr("fill-opacity", 0.2)
+                .attr("stroke", "none")
+                .style("pointer-events", "none")
+                .attr("d",
+                    d3.area()
+                        .curve(d3.curveBasis)
+                        .x(([x, y]) => xAxis(x))
+                        .y0(dimensions.height)
+                        .y1(([x, y]) => yAxis(Math.min(y, YLIMIT))) as d3.ValueFn<SVGPathElement, number[][], any>
+                )
+            ;
+            references.find(({key: k}) => k === key)?.refs.push(area);
             // Group
             const dots = svg.selectAll("myDots")
                 .data(data)
@@ -160,21 +179,24 @@ export default function Chart() {
                 .attr("stroke", colors[key as Key])
                 .attr("stroke-width", 2)
                 .attr("d", d3.line()
-                // .curve(d3.curveBasis)
-                .x(([x, y]) => xAxis(x)).y(([x, y]) => yAxis(Math.min(y, YLIMIT))) as any)
+                    .curve(d3.curveBasis)
+                    .x(([x, y]) => xAxis(x))
+                    .y(([x, y]) => yAxis(Math.min(y, YLIMIT))) as d3.ValueFn<SVGPathElement, number[][], any>
+                )
             ;
             references.find(({key: k}) => k === key)?.refs.push(line);
             // Points
-            const plotPoints = svg
-                .append("g")
+            const plotPoints = svg.append("g")
                 .selectAll("dot")
                 .data(data)
                 .join("circle")
-                    .attr("cx", ([x, y]) => xAxis(x))
-                    .attr("cy", ([x, y]) => yAxis(Math.min(y, YLIMIT)))
-                    .attr("r", 6)
-                    .attr("fill", colors[key as Key])
-                    .attr("stroke", "black")
+                .attr("cx", ([x, y]) => xAxis(x))
+                .attr("cy", ([x, y]) => yAxis(Math.min(y, YLIMIT)))
+                .attr("r", 6)
+                .attr("fill", colors[key as Key])
+                .attr("stroke", "#1a1a1a")
+                .style("stroke-width", "2px")
+                .style("opacity", "1")
             ;
             references.find(({key: k}) => k === key)?.refs.push(plotPoints);
             // Tooltip
@@ -188,13 +210,14 @@ export default function Chart() {
             ;
             // Mouseover
             plotPoints.on("mouseover", (event: PointerEvent, d: any) => {
-                const hourMinutes = new Date(d[0]).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'});
+                const hourMin = new Date(d[0]).toTimeString().split(' ')[0].slice(0, 5);
                 const minutes = Math.trunc(d[1]);
                 const seconds = Math.trunc((d[1] - minutes) * 60).toFixed().padStart(2, '0');
-                const tooltipContent = `Time: ${hourMinutes}<br>Minutes: ${minutes}:${seconds}`;
+                const tooltipContent = `<b>${keyLabels.find(({key: k}) => k === key)?.label}</b><br>Hour: ${hourMin}<br>Delay: ${minutes}:${seconds}`;
                 tooltip.html(tooltipContent)
                     .style("left", `${event.pageX}px`)
                     .style("top", `${event.pageY}px`)
+                    .style("border", `1px solid ${colors[key as Key]}`)
                     .style("opacity", 1);
             });
             plotPoints.on("mouseout", () => {
@@ -208,26 +231,16 @@ export default function Chart() {
     }, [selected])
 
     return (
-        <>
-            <section className="col-2 px-2 vstack gap-2">
+        <section className="row vstack gap-2">
+            <section className="container hstack gap-2 d-flex justify-content-center align-content-center flex-wrap">
             {
                 keyLabels.map(({key: k, label}) => (
                     <div key={k} className='form-check form-check-inline hstack gap-2'>
-                        <input 
+                        <input
                             className='btn-check' 
                             id={`btn-check-${k}`}
                             type='checkbox'
-                            onChange={(e) => {
-                                setSelected((prev) => {
-                                    const newSelected = prev.map((s) => {
-                                        if (s.key === k) {
-                                            return {...s, sel: !s.sel}
-                                        }
-                                        return s;
-                                    });
-                                    return newSelected;
-                                });
-                            }}
+                            onChange={(e) => setSelected((prev) => prev.map((s) => s.key === k ? {...s, sel: !s.sel} : s))}
                             checked={selected.find(({key}) => key === k)?.sel}
                         />
                         <label
@@ -239,18 +252,11 @@ export default function Chart() {
                 ))
             }
                 <div className='form-check form-check-inline'>
-                    <input 
+                    <input
                         className='btn-check' 
                         id={`btn-check-unselect`}
                         type='checkbox'
-                        onChange={(e) => {
-                            setSelected((prev) => {
-                                const newSelected = prev.map((s) => {
-                                    return {...s, sel: false}
-                                });
-                                return newSelected;
-                            });
-                        }}
+                        onChange={(e) => setSelected((prev) => prev.map((s) => ({...s, sel: false})))}
                         checked={!selected.find(({sel}) => sel === true)}
                     />
                     <label
@@ -259,16 +265,18 @@ export default function Chart() {
                     >Unselect</label>
                 </div>
             </section>
-            <div className="col-10 vstack gap-2">
-                <Base refBase={refChild} margin={margin} dimensions={dimensions}>
-                    <>
+            <section className="col-12 vstack">
+                <div className="d-flex justify-content-center">
+                    <Base refBase={refChild} margin={margin} dimensions={dimensions}>
                         <LayoutYAxis y={yAxis} dimensions={dimensions} />
                         <LayoutXAxis x={xAxis} dimensions={dimensions} />
                         <TimeLine x2={xAxis(nowYesterday)} y2={height} />
-                    </>
-                </Base>
-                <p className="px-2">{date}</p>
-            </div>
-        </>
+                    </Base>
+                </div>
+                <div className="d-flex justify-content-center">
+                    <p className="form-text">{dates.yesterday} UTC {dates.kind} data</p>
+                </div>
+            </section>
+        </section>
     )
 }
