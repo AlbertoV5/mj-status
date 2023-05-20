@@ -26,7 +26,7 @@ export const defaultChartData = {
     "v5_diffusion": [],
     "v5_diffusion_anime": [],
 }
-export const testKey = 'v5_diffusion_anime';
+export const defaultKey = 'v5_diffusion_anime';
 
 interface DataResult {
     data: Record<Key, number[]>;
@@ -34,7 +34,7 @@ interface DataResult {
     kind: "historical" | "predicted";
 }
 
-/** Returns data based on date. */
+/** Returns data based on day offset. */
 export async function getChartData(path: string = "/metrics/relax", offset: number = 1): Promise<DataResult>{
     // Get date from current time minus offset days. UTC not needed, apparently.
     const a = new Date().getTime() - (24 * (offset - 1)) * 1000 * 60 * 60;

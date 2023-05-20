@@ -1,4 +1,4 @@
-import { getChartData, Key, testKey, colors, keyLabels } from "./util";
+import { getChartData, Key, defaultKey, colors, keyLabels } from "./util";
 import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import useWindowDimensions from "./useWindowDimensions";
 // d3 functions
@@ -120,9 +120,7 @@ const references: {key: Key, refs: any[]}[] = keyLabels.map(({key}) => ({key: ke
 
 export default function Chart() {
     const refChild = useRef<SVGSVGElement>(null);
-    const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => 
-        keyLabels.map(({key}) => ({key, sel: key === testKey})
-    ));
+    const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => []);
     const [allData, setAllData] = useState<Record<Key, number[]> | undefined>(undefined);
     const [dates, setDates] = useState<{yesterday: string | undefined, kind: string | undefined}>({yesterday: undefined, kind: undefined});
     // dimensions
@@ -137,7 +135,7 @@ export default function Chart() {
         .then(({data, yesterday, kind}) => {
             setAllData(data);
             setDates({yesterday, kind});
-            setSelected(loadSelected);
+            setSelected(prev => loadSelected() || keyLabels.map(({key}) => ({key, sel: key === defaultKey})));
         });
     }, [])
     // effect
