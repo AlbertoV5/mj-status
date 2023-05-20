@@ -8,7 +8,8 @@ import { scaleLinear, scaleTime } from "d3-scale";
 import { axisBottom, axisLeft, curveBasis, timeFormat } from "d3";
 // d3 types
 import type { ScaleLinear, ScaleTime, ValueFn } from "d3";
-
+// store
+import { storeSelected, loadSelected } from "./store";
 
 interface BaseProps {
     refBase: React.RefObject<SVGSVGElement>,
@@ -136,7 +137,7 @@ export default function Chart() {
         .then(({data, yesterday, kind}) => {
             setAllData(data);
             setDates({yesterday, kind});
-            setSelected(keyLabels.map(({key}) => ({key, sel: key === testKey})))
+            setSelected(loadSelected);
         });
     }, [])
     // effect
@@ -246,7 +247,11 @@ export default function Chart() {
                             className='btn-check' 
                             id={`btn-check-${k}`}
                             type='checkbox'
-                            onChange={() => setSelected(prev => [...prev.filter(({key}) => key !== k), {key: k, sel: !prev.find(({key}) => key === k)?.sel}])}
+                            onChange={() => setSelected(prev => {
+                                const s = [...prev.filter(({key}) => key !== k), {key: k, sel: !prev.find(({key}) => key === k)?.sel}]
+                                storeSelected(s);
+                                return s;
+                            })}
                             checked={selected.find(({key}) => key === k)?.sel}
                         />
                         <label className='btn btn-outline-primary'htmlFor={`btn-check-${k}`}>{label}</label>
@@ -259,7 +264,11 @@ export default function Chart() {
                         className='btn-check' 
                         id={`btn-check-unselect`}
                         type='checkbox'
-                        onChange={(e) => setSelected((prev) => prev.map((s) => ({...s, sel: false})))}
+                        onChange={(e) => setSelected(prev => {
+                            const s = prev.map((s) => ({...s, sel: false}));
+                            storeSelected(s);
+                            return s;
+                        })}
                         checked={!selected.find(({sel}) => sel === true)}
                     />
                     <label className='btn btn-outline-secondary' htmlFor={`btn-check-unselect`}>Reset</label>

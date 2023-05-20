@@ -28,7 +28,6 @@ export const defaultChartData = {
 }
 export const testKey = 'v5_diffusion_anime';
 
-
 interface DataResult {
     data: Record<Key, number[]>;
     yesterday: string;
