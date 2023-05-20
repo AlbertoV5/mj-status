@@ -221,8 +221,8 @@ export default function Chart() {
                 const seconds = Math.trunc((d[1] - minutes) * 60).toFixed().padStart(2, '0');
                 const tooltipContent = `<b>${keyLabels.find(({key: k}) => k === key)?.label}</b><br>Hour: ${hourMin}<br>Delay: ${minutes}:${seconds}`;
                 tooltip.html(tooltipContent)
-                    .style("left", `${event.pageX}px`)
-                    .style("top", `${event.pageY}px`)
+                    .style("left", `${event.pageX - 48}px`)
+                    .style("top", `${event.pageY - 96}px`)
                     .style("border", `1px solid ${colors[key as Key]}`)
                     .style("opacity", 1);
             });
@@ -262,7 +262,7 @@ export default function Chart() {
                         onChange={(e) => setSelected((prev) => prev.map((s) => ({...s, sel: false})))}
                         checked={!selected.find(({sel}) => sel === true)}
                     />
-                    <label className='btn btn-outline-secondary' htmlFor={`btn-check-unselect`}>Unselect</label>
+                    <label className='btn btn-outline-secondary' htmlFor={`btn-check-unselect`}>Reset</label>
                 </div>
             </section>
             <section className="col-12 vstack">
