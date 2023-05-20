@@ -89,16 +89,17 @@ export default function Chart() {
     // dimensions
     const margin = {top: 10, right: 30, bottom: 30, left: 30};
     const {width, height} = useWindowDimensions();
-
     const dimensions = {width: width * 0.66 - margin.left - margin.right, height: height * 0.66 - margin.top - margin.bottom}
     // time
     const utc = new Date().getTimezoneOffset() * 60000;
-    const today = new Date().setHours(0, 0, 0, 0) - utc;
-    const yesterday = today - 24 * 60 * 60 * 1000;
-    const nowYesterday = new Date().getTime() - 24 * 60 * 60 * 1000;
+    const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
+    const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
+    // const nowYesterday = new Date().getTime() - 24 * 60 * 60 * 1000;
+    const now = new Date().getTime();
+    const nowYesterday = (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
     const minutes15 = 15 * 60 * 1000;
     // axis
-    const xAxis = getXAxis(yesterday, today, dimensions);
+    const xAxis = getXAxis(startOfYesterday, startOfToday, dimensions);
     const yAxis = getYAxis(YLIMIT, dimensions);
     useEffect(() => {
         getYesterdayData()
@@ -131,7 +132,7 @@ export default function Chart() {
                 return;
             };
             const values = allData[key as Key];
-            const data = values.map((value, i) => ([yesterday + (i * minutes15), value]))
+            const data = values.map((value, i) => ([startOfYesterday + (i * minutes15), value]))
             // Group
             const dots = svg.selectAll("myDots")
                 .data(data)
