@@ -18,7 +18,7 @@ const Base = ({refBase, margin, dimensions, children}: BaseProps) => {
                 height={dimensions.height  + margin.top + margin.bottom}
             >
                 <g 
-                    ref={refBase} 
+                    ref={refBase}
                     transform={`translate(${margin.left},${margin.top})`}
                 >
                     {children}
@@ -27,6 +27,7 @@ const Base = ({refBase, margin, dimensions, children}: BaseProps) => {
         </section>
     )
 }
+
 
 const LayoutXAxis = ({x, dimensions}: {x: d3.ScaleTime<number, number>, dimensions: {width: number, height: number}}) => {
     const ref = useRef<SVGSVGElement>(null);
@@ -60,6 +61,26 @@ const LayoutYAxis = ({y, dimensions}: {y: d3.ScaleLinear<number, number>, dimens
     }, [])
     return (
         <g ref={ref}></g>
+    )
+}
+
+const TimeLine = ({x2, y2}: {x2: number, y2: number}) => {
+    const ref = useRef<SVGLineElement>(null);
+    useLayoutEffect(() => {
+        if (!ref.current) return;
+        d3.select(ref.current)
+        .attr("x1", x2)
+        .attr("y1", 0)
+        .attr("x2", x2)
+        .attr("y2", y2)
+        .style("stroke-width", 2)
+        .style("stroke", "#fff")
+        .style("stroke-dasharray", 5)
+        .style("opacity", 0.7)
+        .style("fill", "none");
+    }, [])
+    return (
+        <line ref={ref}></line>
     )
 }
 
@@ -112,18 +133,6 @@ export default function Chart() {
     useLayoutEffect(() => {
         if (!refChild.current || !allData) return;
         const svg = d3.select(refChild.current);
-        // add now line
-        svg.append("line")
-        .attr("x1", xAxis(nowYesterday))  //<<== change your code here
-        .attr("y1", 0)
-        .attr("x2", xAxis(nowYesterday))  //<<== and here
-        .attr("y2", height - margin.top - margin.bottom)
-        .style("stroke-width", 2)
-        .style("stroke", "#8cc9dc")
-        .style("stroke-dasharray", 5)
-        .style("opacity", 0.5)
-        .style("fill", "none");
-        // add reference
         // query data from selected
         selected.forEach(({key, sel}) => {
             if (!sel) {
@@ -252,6 +261,7 @@ export default function Chart() {
                     <>
                         <LayoutYAxis y={yAxis} dimensions={dimensions} />
                         <LayoutXAxis x={xAxis} dimensions={dimensions} />
+                        <TimeLine x2={xAxis(nowYesterday)} y2={height} />
                     </>
                 </Base>
             </div>
