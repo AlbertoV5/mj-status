@@ -13,10 +13,10 @@ export const keyLabels = [
 export const colors = {
     "kdpt_diffusion_anime": "#F9DF74",
     "v4_anime_upscaler": "#EDAE49",
-    "v4_diffusion": "#4BD17A",
-    "v4_upscaler": "#1DA157",
+    "v4_diffusion": "#6BE17A",
+    "v4_upscaler": "#1EA559",
     "v5_diffusion": "#8cc9dc",
-    "v5_diffusion_anime": "#95C5F0",
+    "v5_diffusion_anime": "#75B5F0",
 }
 export const defaultChartData = {
     "kdpt_diffusion_anime": [],
