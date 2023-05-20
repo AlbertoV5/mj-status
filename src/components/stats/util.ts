@@ -26,6 +26,11 @@ interface DataResult {
     date: string;
 }
 
+export async function testCloudFront() {
+    const result = await d3.json('/test/2023-05-19_2023-05-20');
+    console.log(result);
+}
+
 // TODO: Edge function to handle logic
 /** Returns data based on date. */
 export async function getChartData(path: string = "/metrics/relax"): Promise<DataResult>{

@@ -1,4 +1,4 @@
-import { getChartData, Key, testKey, colors, keyLabels } from "./util";
+import { getChartData, testCloudFront, Key, testKey, colors, keyLabels } from "./util";
 import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import useWindowDimensions from "./useWindowDimensions";
 import * as d3 from "d3";
@@ -130,6 +130,7 @@ export default function Chart() {
             setDate(date);
             setSelected(keyLabels.map(({key}) => ({key, sel: key === testKey})))
         });
+        testCloudFront();
     }, [])
     // effect
     useLayoutEffect(() => {
