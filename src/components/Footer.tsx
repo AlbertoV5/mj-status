@@ -3,10 +3,10 @@ import React from 'react'
 export const Footer = () => {
     return (
 	    <section 
-            className="row mt-2" 
+            className="container" 
             style={{height: "100px"}}
         >
-            
+            <section className='row'></section>
         </section>
     )
 }
