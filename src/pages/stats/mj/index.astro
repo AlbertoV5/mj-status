@@ -1,5 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from '../../../layouts/Layout.astro';
+import Chart from "../../../components/stats/Chart"
 ---
 
 <style is:global>
@@ -16,6 +17,12 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout title="Promptry">
 	<main class="container-fluid px-4 vstack gap-4">
-		
+		<header class="row">
+			<h1>Stats</h1>
+			<p>Average wait times.</p>
+		</header>
+		<section class="row">
+			<Chart client:only></Chart>
+		</section>
 	</main>
 </Layout>
