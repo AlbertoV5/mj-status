@@ -78,6 +78,7 @@ const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
 }
 
 const references: {key: Key, refs: any[]}[] = keyLabels.map(({key}) => ({key: key as Key, refs: [] as any[]}));
+const YLIMIT = 10;
 
 export default function Chart() {
     const refChild = useRef<SVGSVGElement>(null);
@@ -94,10 +95,11 @@ export default function Chart() {
     const utc = new Date().getTimezoneOffset() * 60000;
     const today = new Date().setHours(0, 0, 0, 0) - utc;
     const yesterday = today - 24 * 60 * 60 * 1000;
+    const nowYesterday = new Date().getTime() - 24 * 60 * 60 * 1000;
     const minutes15 = 15 * 60 * 1000;
     // axis
     const xAxis = getXAxis(yesterday, today, dimensions);
-    const yAxis = getYAxis(10.0, dimensions);
+    const yAxis = getYAxis(YLIMIT, dimensions);
     useEffect(() => {
         getYesterdayData()
         .then(d => {
@@ -109,6 +111,18 @@ export default function Chart() {
     useLayoutEffect(() => {
         if (!refChild.current || !allData) return;
         const svg = d3.select(refChild.current);
+        // add now line
+        svg.append("line")
+        .attr("x1", xAxis(nowYesterday))  //<<== change your code here
+        .attr("y1", 0)
+        .attr("x2", xAxis(nowYesterday))  //<<== and here
+        .attr("y2", height - margin.top - margin.bottom)
+        .style("stroke-width", 2)
+        .style("stroke", "#8cc9dc")
+        .style("stroke-dasharray", 5)
+        .style("opacity", 0.5)
+        .style("fill", "none");
+        // add reference
         // query data from selected
         selected.forEach(({key, sel}) => {
             if (!sel) {
@@ -126,7 +140,7 @@ export default function Chart() {
                 .style("fill", colors[key as Key])
             ;
             references.find(({key: k}) => k === key)?.refs.push(dots);
-            // Add the line
+            // Add data line
             const line = svg.append("path")
                 .datum(data)
                 .attr("fill", "none")
@@ -134,7 +148,7 @@ export default function Chart() {
                 .attr("stroke-width", 2)
                 .attr("d", d3.line()
                 // .curve(d3.curveBasis)
-                .x(([x, y]) => xAxis(x)).y(([x, y]) => yAxis(y)) as any)
+                .x(([x, y]) => xAxis(x)).y(([x, y]) => yAxis(Math.min(y, YLIMIT))) as any)
             ;
             references.find(({key: k}) => k === key)?.refs.push(line);
             // Points
@@ -144,7 +158,7 @@ export default function Chart() {
                 .data(data)
                 .join("circle")
                     .attr("cx", ([x, y]) => xAxis(x))
-                    .attr("cy", ([x, y]) => yAxis(y))
+                    .attr("cy", ([x, y]) => yAxis(Math.min(y, YLIMIT)))
                     .attr("r", 6)
                     .attr("fill", colors[key as Key])
                     .attr("stroke", "black")
