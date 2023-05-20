@@ -1,7 +1,14 @@
 import { getChartData, Key, testKey, colors, keyLabels } from "./util";
 import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import useWindowDimensions from "./useWindowDimensions";
-import * as d3 from "d3";
+// d3 functions
+import { select } from "d3-selection";
+import { line, area } from "d3-shape";
+import { scaleLinear, scaleTime } from "d3-scale";
+import { axisBottom, axisLeft, curveBasis, timeFormat } from "d3";
+// d3 types
+import type { ScaleLinear, ScaleTime, ValueFn } from "d3";
+
 
 interface BaseProps {
     refBase: React.RefObject<SVGSVGElement>,
@@ -28,16 +35,16 @@ const Base = ({refBase, margin, dimensions, children}: BaseProps) => {
     )
 }
 
-const LayoutXAxis = ({x, dimensions}: {x: d3.ScaleTime<number, number>, dimensions: {width: number, height: number}}) => {
+const LayoutXAxis = ({x, dimensions}: {x: ScaleTime<number, number>, dimensions: {width: number, height: number}}) => {
     const ref = useRef<SVGSVGElement>(null);
     useLayoutEffect(() => {
         if (!ref.current) return;
-        d3.select(ref.current)
+        select(ref.current)
             .attr("transform", "translate(0," + dimensions.height + ")")
             .call(
-                d3.axisBottom(x)
+                axisBottom(x)
                 .ticks(dimensions.width / dimensions.height >= BreakPointRatio ? 10 : 5)
-                .tickFormat(d3.timeFormat("%H:%M") as any)
+                .tickFormat(timeFormat("%H:%M") as any)
             )
             .style("font", "14px sans-serif")
         ;
@@ -47,15 +54,15 @@ const LayoutXAxis = ({x, dimensions}: {x: d3.ScaleTime<number, number>, dimensio
     )
 }
 
-const LayoutYAxis = ({y, dimensions}: {y: d3.ScaleLinear<number, number>, dimensions: {width: number, height: number}}) => {
+const LayoutYAxis = ({y, dimensions}: {y: ScaleLinear<number, number>, dimensions: {width: number, height: number}}) => {
     const ref = useRef<SVGSVGElement>(null);
     useLayoutEffect(() => {
         if (!ref.current) return;
-        d3.select(ref.current)
-        .call(d3.axisLeft(y))
+        select(ref.current)
+        .call(axisLeft(y))
         .style("font", "14px sans-serif")
         ;
-        const t = d3.select('.tick')
+        const t = select('.tick')
         t.remove();
     }, [])
     return (
@@ -67,7 +74,7 @@ const TimeLine = ({x2, y2}: {x2: number, y2: number}) => {
     const ref = useRef<SVGLineElement>(null);
     useLayoutEffect(() => {
         if (!ref.current) return;
-        d3.select(ref.current)
+        select(ref.current)
         .attr("x1", x2)
         .attr("y1", 0)
         .attr("x2", x2)
@@ -84,30 +91,31 @@ const TimeLine = ({x2, y2}: {x2: number, y2: number}) => {
 }
 
 const getXAxis = (yesterday: number, today: number, dimensions: {width: number, height: number}) => {
-    const xAxis = d3.scaleTime()
+    const xAxis = scaleTime()
     .domain([yesterday, today - minutes15])
     .range([ 0, dimensions.width ]);
     return xAxis;
 }
 
 const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
-    const yAxis = d3.scaleLinear()
+    const yAxis = scaleLinear()
     .domain( [0, max] )
     .range([ dimensions.height, 0 ]);
     return yAxis;
 }
 
-// absolutes
+// Constants
+const YLIMIT = 10;
+// Absolute Time
 const utc = new Date().getTimezoneOffset() * 60000;
 const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
 const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
-// for timeline
+// Relative Time
 const now = new Date().getTime();
 const nowYesterday = (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
 const minutes15 = 15 * 60 * 1000;
-// const
+// mutable
 const references: {key: Key, refs: any[]}[] = keyLabels.map(({key}) => ({key: key as Key, refs: [] as any[]}));
-const YLIMIT = 10;
 
 export default function Chart() {
     const refChild = useRef<SVGSVGElement>(null);
@@ -119,9 +127,7 @@ export default function Chart() {
     // dimensions
     const {width, height} = useWindowDimensions();
     const margin = {top: 30, right: height > width ? 20 : 40, bottom: 30, left: height > width ? 20 : 40};
-    const dimensions = {width: (width * 1) - margin.left - margin.right, height: height * 0.6 - margin.top - margin.bottom}
-    // time
-
+    const dimensions = {width: (width * 0.98) - margin.left - margin.right, height: height * 0.66 - margin.top - margin.bottom}
     // axis
     const xAxis = getXAxis(startOfYesterday, startOfToday, dimensions);
     const yAxis = getYAxis(YLIMIT, dimensions);
@@ -136,7 +142,7 @@ export default function Chart() {
     // effect
     useLayoutEffect(() => {
         if (!refChild.current || !allData) return;
-        const svg = d3.select(refChild.current);
+        const svg = select(refChild.current);
         // query data from selected
         selected.forEach(({key, sel}) => {
             // remove all references regardless if selected or not
@@ -148,7 +154,7 @@ export default function Chart() {
             const data = values.map((value, i) => ([startOfYesterday + (i * minutes15), value]))
             // D3
             // add the area
-            const area = svg.append("path")
+            const svgArea = svg.append("path")
                 .data([data])
                 .attr("class", "area")
                 .attr("fill", colors[key as Key])
@@ -156,35 +162,35 @@ export default function Chart() {
                 .attr("stroke", "none")
                 .style("pointer-events", "none")
                 .attr("d",
-                    d3.area()
-                        .curve(d3.curveBasis)
+                    area()
+                        .curve(curveBasis)
                         .x(([x, y]) => xAxis(x))
                         .y0(dimensions.height)
-                        .y1(([x, y]) => yAxis(Math.min(y, YLIMIT))) as d3.ValueFn<SVGPathElement, number[][], any>
+                        .y1(([x, y]) => yAxis(Math.min(y, YLIMIT))) as ValueFn<SVGPathElement, number[][], any>
                 )
             ;
-            references.find(({key: k}) => k === key)?.refs.push(area);
+            references.find(({key: k}) => k === key)?.refs.push(svgArea);
             // Group
-            const dots = svg.selectAll("myDots")
+            const svgDots = svg.selectAll("myDots")
                 .data(data)
                 .enter()
                 .append('g')
                 .style("fill", colors[key as Key])
             ;
-            references.find(({key: k}) => k === key)?.refs.push(dots);
+            references.find(({key: k}) => k === key)?.refs.push(svgDots);
             // Add data line
-            const line = svg.append("path")
+            const svgLine = svg.append("path")
                 .datum(data)
                 .attr("fill", "none")
                 .attr("stroke", colors[key as Key])
                 .attr("stroke-width", 2)
-                .attr("d", d3.line()
-                    .curve(d3.curveBasis)
+                .attr("d", line()
+                    .curve(curveBasis)
                     .x(([x, y]) => xAxis(x))
-                    .y(([x, y]) => yAxis(Math.min(y, YLIMIT))) as d3.ValueFn<SVGPathElement, number[][], any>
+                    .y(([x, y]) => yAxis(Math.min(y, YLIMIT))) as ValueFn<SVGPathElement, number[][], any>
                 )
             ;
-            references.find(({key: k}) => k === key)?.refs.push(line);
+            references.find(({key: k}) => k === key)?.refs.push(svgLine);
             // Points
             const plotPoints = svg.append("g")
                 .selectAll("dot")
@@ -200,7 +206,7 @@ export default function Chart() {
             ;
             references.find(({key: k}) => k === key)?.refs.push(plotPoints);
             // Tooltip
-            const tooltip = d3.select("body")
+            const tooltip = select("body")
                 .append("div")
                 .attr("class", "bg-dark")
                 .style("opacity", 0)
@@ -240,14 +246,11 @@ export default function Chart() {
                             className='btn-check' 
                             id={`btn-check-${k}`}
                             type='checkbox'
-                            onChange={(e) => setSelected((prev) => prev.map((s) => s.key === k ? {...s, sel: !s.sel} : s))}
+                            onChange={() => setSelected(prev => [...prev.filter(({key}) => key !== k), {key: k, sel: !prev.find(({key}) => key === k)?.sel}])}
                             checked={selected.find(({key}) => key === k)?.sel}
                         />
-                        <label
-                            className='btn btn-outline-primary'
-                            htmlFor={`btn-check-${k}`}
-                        >{label}</label>
-                        <div style={{width: '15px', height: '15px', borderRadius: '50%', backgroundColor: colors[k as Key]}}></div>
+                        <label className='btn btn-outline-primary'htmlFor={`btn-check-${k}`}>{label}</label>
+                        <svg style={{width: '15px', height: '15px', borderRadius: '50%', backgroundColor: colors[k as Key]}}></svg>
                     </div>
                 ))
             }
@@ -259,10 +262,7 @@ export default function Chart() {
                         onChange={(e) => setSelected((prev) => prev.map((s) => ({...s, sel: false})))}
                         checked={!selected.find(({sel}) => sel === true)}
                     />
-                    <label
-                        className='btn btn-outline-secondary'
-                        htmlFor={`btn-check-unselect`}
-                    >Unselect</label>
+                    <label className='btn btn-outline-secondary' htmlFor={`btn-check-unselect`}>Unselect</label>
                 </div>
             </section>
             <section className="col-12 vstack">
