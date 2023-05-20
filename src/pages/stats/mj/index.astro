@@ -17,9 +17,11 @@ import Chart from "../../../components/stats/Chart"
 
 <Layout title="Promptry">
 	<main class="container-fluid">
-		<header class="row px-4">
-			<h1>Stats</h1>
-			<p>Average wait times for relaxed generation.</p>
+		<header class="row px-4 pb-2 text-center">
+			<h1>Stats MJ</h1>
+			<p>
+				Average Wait Time (mm:ss) per Time of Day (hh:mm) from 00:00 to 23:45 UTC converted to Local Time.
+			</p>
 		</header>
 		<Chart client:only></Chart>
 	</main>

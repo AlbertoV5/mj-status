@@ -16,7 +16,7 @@ export const colors = {
     "v4_diffusion": "#6BE17A",
     "v4_upscaler": "#1EA559",
     "v5_diffusion": "#8cc9dc",
-    "v5_diffusion_anime": "#75B5F0",
+    "v5_diffusion_anime": "#75A5F0",
 }
 export const defaultChartData = {
     "kdpt_diffusion_anime": [],
@@ -31,6 +31,7 @@ export const defaultKey = 'v5_diffusion_anime';
 interface DataResult {
     data: Record<Key, number[]>;
     yesterday: string;
+    today: string;
     kind: "historical" | "predicted";
 }
 
@@ -45,10 +46,10 @@ export async function getChartData(path: string = "/metrics/relax", offset: numb
     const dataURL = `${path}/${yesterday}_${today}.json`;
     try {
         const data = await d3.json(dataURL) as Record<Key, number[]>;
-        return {data: data, yesterday: yesterday, kind: offset === 0 ? "predicted" : "historical"}
+        return {data: data, yesterday: yesterday, today: today, kind: offset === 0 ? "predicted" : "historical"}
     }
     catch {
         console.log(`Failed to fetch data from ${yesterday}`);
-        return {data: defaultChartData, yesterday: yesterday, kind: offset === 0 ? "predicted" : "historical"}
+        return {data: defaultChartData, yesterday: yesterday, today: today, kind: offset === 0 ? "predicted" : "historical"}
     }
 }

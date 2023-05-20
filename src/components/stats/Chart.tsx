@@ -123,7 +123,7 @@ export default function Chart() {
     const lineRef = useRef<SVGLineElement>(null);
     const [chartData, setChartData] = useState<Record<Key, number[]> | undefined>(undefined);
     const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => keyLabels.map(({key}) => ({key: key as Key, sel: true})));
-    const [dates, setDates] = useState<{yesterday: string | undefined, kind: string | undefined}>({yesterday: undefined, kind: undefined});
+    const [dates, setDates] = useState<{yesterday: string | undefined, today: string | undefined,  kind: string | undefined}>({yesterday: undefined, today: undefined, kind: undefined});
     // dimensions (client-only)
     const {width, height} = useWindowDimensions();
     const margin = {top: 30, right: height > width ? 20 : 40, bottom: 30, left: height > width ? 20 : 40};
@@ -134,10 +134,10 @@ export default function Chart() {
     // on Load
     useEffect(() => {
         getChartData()
-        .then(({data, yesterday, kind}) => {
+        .then(({data, yesterday, today, kind}) => {
             setChartData(data);
-            setDates({yesterday, kind});
-            setSelected(prev => loadSelected() || keyLabels.map(({key}) => ({key, sel: true})));
+            setDates({yesterday, today, kind});
+            setSelected(prev => loadSelected() || keyLabels.map(({key}, i) => ({key, sel: i > 3 ? true : false})));
         });
     }, []);
     // effect
@@ -185,7 +185,7 @@ export default function Chart() {
                 .attr("class", "bg-dark")
                 .style("opacity", 0)
                 .style("position", "absolute")
-                .style("padding", "8px")
+                .style("padding", "10px")
                 .style("pointer-events", "none")
             ;
             // Points
@@ -195,21 +195,22 @@ export default function Chart() {
                 .join("circle")
                 .attr("cx", ([x, y]) => xAxis(x))
                 .attr("cy", ([x, y]) => yAxis(Math.min(y, Y_LIMIT)))
-                .attr("r", 6)
+                .attr("r", 5)
                 .attr("fill", colors[key as Key])
                 .attr("stroke", "#111111")
                 .style("stroke-width", 1)
-                .style("opacity", "1")
                 .on("mouseover", (event: PointerEvent, d: any) => {
                     const hourMinutes = new Date(d[0]).toLocaleTimeString().replace(":00 ", " ");
                     const minutes = Math.trunc(d[1]);
                     const seconds = Math.trunc((d[1] - minutes) * 60).toFixed().padStart(2, '0');
-                    const tooltipContent = `<b>${keyLabels.find(({key: k}) => k === key)?.label}</b><br>${hourMinutes}<br><b>Wait:</b> ${minutes.toFixed().padStart(2, '0')}:${seconds}`;
+                    const tooltipContent = `<b>${keyLabels.find(({key: k}) => k === key)?.label}</b> @ ${hourMinutes}
+                    <br><b>Wait Time:</b> ${minutes.toFixed().padStart(2, '0')}:${seconds}
+                    `;
                     tooltip.html(tooltipContent)
                         .style("left", `${event.pageX - 48}px`)
                         .style("top", `${event.pageY - 96}px`)
-                        .style("border", `1px solid ${colors[key as Key]}`)
-                        .style("opacity", 1);
+                        .style("border", `1px solid ${colors[key as Key]}bb`)
+                        .style("opacity", 1.0);
                 })
                 .on("mouseout", () => {
                     tooltip.style("opacity", 0);
@@ -275,8 +276,8 @@ export default function Chart() {
                         <NowLine svgRef={lineRef} x2={xAxis(nowYesterday)} y2={height} />
                     </Base>
                 </div>
-                <div className="d-flex justify-content-center">
-                    <p className="form-text">{dates.yesterday} UTC {dates.kind} data</p>
+                <div className="gap-2 d-flex justify-content-around">
+                    <p className="form-text">{dates.yesterday} to {dates.today} UTC {dates.kind} data.</p>
                 </div>
             </section>
         </section>
