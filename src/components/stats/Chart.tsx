@@ -1,4 +1,4 @@
-import { getYesterdayData, Key, testKey, colors, keyLabels } from "./util";
+import { getChartData, Key, testKey, colors, keyLabels } from "./util";
 import { useEffect, useState, useRef, useLayoutEffect } from 'react'
 import useWindowDimensions from "./useWindowDimensions";
 import * as d3 from "d3";
@@ -107,6 +107,7 @@ export default function Chart() {
         keyLabels.map(({key}) => ({key, sel: key === testKey})
     ));
     const [allData, setAllData] = useState<Record<Key, number[]> | undefined>(undefined);
+    const [date, setDate] = useState<string | undefined>(undefined);
     // dimensions
     const margin = {top: 10, right: 30, bottom: 30, left: 30};
     const {width, height} = useWindowDimensions();
@@ -123,9 +124,10 @@ export default function Chart() {
     const xAxis = getXAxis(startOfYesterday, startOfToday, dimensions);
     const yAxis = getYAxis(YLIMIT, dimensions);
     useEffect(() => {
-        getYesterdayData()
-        .then(d => {
-            setAllData(d);
+        getChartData()
+        .then(({data, date}) => {
+            setAllData(data);
+            setDate(date);
             setSelected(keyLabels.map(({key}) => ({key, sel: key === testKey})))
         });
     }, [])
@@ -256,7 +258,7 @@ export default function Chart() {
                     >Unselect</label>
                 </div>
             </section>
-            <div className="col-10">
+            <div className="col-10 vstack gap-2">
                 <Base refBase={refChild} margin={margin} dimensions={dimensions}>
                     <>
                         <LayoutYAxis y={yAxis} dimensions={dimensions} />
@@ -264,6 +266,7 @@ export default function Chart() {
                         <TimeLine x2={xAxis(nowYesterday)} y2={height} />
                     </>
                 </Base>
+                <p className="px-2">{date}</p>
             </div>
         </>
     )

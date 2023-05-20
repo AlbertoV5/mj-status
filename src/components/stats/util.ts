@@ -20,18 +20,30 @@ export const colors = {
 }
 export const testKey = 'v5_diffusion_anime';
 
+
+interface DataResult {
+    data: Record<Key, number[]>;
+    date: string;
+}
+
+// TODO: Edge function to handle logic
 /** Returns data based on date. */
-export async function getYesterdayData(path: string = "/metrics/relax"): Promise<Record<Key, number[]>>{
-    const day = new Date().getUTCDate();
-    const month = (new Date().getUTCMonth() + 1).toFixed(0).padStart(2, '0');
-    const year = new Date().getUTCFullYear();
-    const fileName = `${year}-${month}-${day-1}_${year}-${month}-${day}.json`;
-    const dataURL = `${path}/${fileName}`;
-    const data = await d3.json(dataURL);
-    if (!data){
-        // TODO: throw error
-        console.log('Failed to load data.')
-        throw new Error('Failed to load data.');
+export async function getChartData(path: string = "/metrics/relax"): Promise<DataResult>{
+    // if (offset >= 7) throw new Error(`Offset must be less than 7.`);
+    // date
+    // const now = new Date(new Date().setDate(new Date().getDate() - (offset - 1))).toISOString().split('T')[0]
+    const now = new Date().toISOString().split('T')[0]
+    // const yesterday = new Date(new Date().setDate(new Date().getDate() - offset)).toISOString().split('T')[0]
+    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0]
+    // file path
+    const dataURL = `${path}/${yesterday}_${now}.json`;
+    try {
+        const data = await d3.json(dataURL) as Record<Key, number[]>;
+        return {data: data, date: yesterday}
     }
-    return data as Record<Key, number[]>;
+    catch {
+        console.log(`Failed to fetch ${dataURL}. Retrying...`);
+        return {data: {} as Record<Key, number[]>, date: yesterday}
+        // return await getChartData(path, offset + 1);
+    }
 }
