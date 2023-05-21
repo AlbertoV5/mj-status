@@ -1,6 +1,6 @@
 import useWindowDimensions from "./useWindowDimensions";
 import { getChartData, Key, colors, keyLabels } from "./util";
-import { useEffect, useState, useRef, useLayoutEffect } from 'react'
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 // d3 functions
 import { select } from "d3-selection";
 import { line, area } from "d3-shape";
@@ -11,7 +11,7 @@ import type { ScaleLinear, ScaleTime, ValueFn, Selection } from "d3";
 // store
 import { storeSelected, loadSelected } from "./store";
 
-interface BaseProps {
+interface ChartBaseProps {
     svgRef: React.RefObject<SVGSVGElement>,
     margin: {top: number, right: number, bottom: number, left: number},
     dimensions: {width: number, height: number},
@@ -20,16 +20,13 @@ interface BaseProps {
 
 const BreakPointRatio = 1.6;
 
-const Base = ({svgRef, margin, dimensions, children}: BaseProps) => {
+const ChartBase = ({svgRef, margin, dimensions, children}: ChartBaseProps) => {
     return (
         <svg
             width={dimensions.width + margin.left + margin.right} 
             height={dimensions.height  + margin.top + margin.bottom}
         >
-            <g 
-                ref={svgRef}
-                transform={`translate(${margin.left},${margin.top})`}
-            >
+            <g ref={svgRef} transform={`translate(${margin.left},${margin.top})`}>
                 {children}
             </g>
         </svg>
@@ -71,20 +68,34 @@ const LayoutYAxis = ({y, dimensions}: {y: ScaleLinear<number, number>, dimension
     )
 }
 
-const NowLine = ({svgRef, x2, y2}: {svgRef: React.RefObject<SVGLineElement>, x2: number, y2: number}) => {
-    useLayoutEffect(() => {
-        if (!svgRef.current) return;
+const getTime = () => {
+    const utc = new Date().getTimezoneOffset() * 60000;
+    const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
+    const now = new Date().getTime();
+    return (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
+}
+
+const NowLine = ({svgRef, xAxis, y2}: {svgRef: React.RefObject<SVGLineElement>, xAxis: ScaleTime<number, number>, y2: number}) => {
+    // Relative Time
+    const drawLine = (time: number, color: string) => {
         select(svgRef.current)
-        .attr("x1", x2)
-        .attr("y1", 0)
-        .attr("x2", x2)
-        .attr("y2", y2)
-        .style("stroke-width", 3)
-        .style("stroke", "#fff")
-        .style("stroke-dasharray", 6)
-        .style("opacity", 0.8)
-        .style("fill", "none")
+            .attr("x1", xAxis(time))
+            .attr("y1", 0)
+            .attr("x2", xAxis(time))
+            .attr("y2", y2)
+            .style("stroke-width", STROKE_WIDTH)
+            .style("stroke", color)
+            // .style("stroke-dasharray", 6)
+            .style("opacity", 0.5)
+            .style("fill", "none")
         ;
+    }
+    useEffect(() => {
+        if (!svgRef.current) return;
+        drawLine(getTime(), "#fff");
+        // Update Line Every minute
+        const intervalId = window.setInterval(() => drawLine(getTime(), "#fff"), 60000);
+        return () => clearInterval(intervalId);
     }, [])
     return (
         <line ref={svgRef}></line>
@@ -93,28 +104,28 @@ const NowLine = ({svgRef, x2, y2}: {svgRef: React.RefObject<SVGLineElement>, x2:
 
 const getXAxis = (yesterday: number, today: number, dimensions: {width: number, height: number}) => {
     const xAxis = scaleTime()
-    .domain([yesterday, today - minutes15])
-    .range([ 0, dimensions.width ]);
+        .domain([yesterday, today])
+        .range([ 0, dimensions.width ])
+    ;
     return xAxis;
 }
 
 const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
     const yAxis = scaleLinear()
-    .domain( [0, max] )
-    .range([ dimensions.height, 0 ]);
+        .domain( [0, max] )
+        .range([ dimensions.height, 0 ])
+    ;
     return yAxis;
 }
 
 // Constants
 const Y_LIMIT = 10;
-// Absolute Time
+const STROKE_WIDTH = 2;
+const x_INTERVAL = 15 * 60 * 1000;
+// Datetime
 const utc = new Date().getTimezoneOffset() * 60000;
 const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
 const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
-// Relative Time
-const now = new Date().getTime();
-const nowYesterday = (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
-const minutes15 = 15 * 60 * 1000;
 // mutable
 const svgGroups: Record<Key, Selection<SVGGElement, unknown, null, undefined> | undefined> = keyLabels.reduce((prev, item) => ({...prev, [item.key]: undefined}), {} as Record<Key, undefined>);
 
@@ -146,8 +157,9 @@ export default function Chart() {
         const svg = select(svgRef.current);
         selected.forEach(({key, sel}) => {
             // create [x, y] data
-            const data = chartData[key as Key].map((value, i) => ([startOfYesterday + (i * minutes15), value]))
-            // Group initially hidden
+            const rightPad = chartData[key as Key].slice(-1)[0];
+            const data = [...chartData[key as Key], rightPad].map((value, i) => ([startOfYesterday + (i * x_INTERVAL), value]));
+            // create group, initially hidden
             const svgGroup = svg.append("g").style("opacity", "0");
             svgGroups[key as Key] = svgGroup;
             // add the area
@@ -157,7 +169,7 @@ export default function Chart() {
                 .attr("fill", colors[key as Key])
                 .attr("fill-opacity", 0.2)
                 .attr("stroke", colors[key as Key])
-                .attr("stroke-width", 2)
+                .attr("stroke-width", STROKE_WIDTH)
                 .style("pointer-events", "none")
                 .attr("d",
                     area()
@@ -167,17 +179,33 @@ export default function Chart() {
                         .y1(([x, y]) => yAxis(Math.min(y, Y_LIMIT))) as ValueFn<SVGPathElement, number[][], any>
                 )
             ;
-            // Add data line
+            // // Add data line
             // svgGroup.append("path")
-            //     .datum(data)
+            //     .datum(data.filter(([x, y]) => y > Y_LIMIT).map(([x, y]) => ([x, y - Y_LIMIT])))
+            //     // .datum(data)
             //     .attr("fill", "none")
-            //     .attr("stroke", colors[key as Key])
+            //     .attr("stroke", "#aa0000")
             //     .attr("stroke-width", 2)
             //     .attr("d", line()
-            //         .curve(curveBasis)
+            //         // .curve(curveBasis)
             //         .x(([x, y]) => xAxis(x))
-            //         .y(([x, y]) => yAxis(Math.min(y, Y_LIMIT))) as ValueFn<SVGPathElement, number[][], any>
+            //         .y(([x, y]) => yAxis(y)) as ValueFn<SVGPathElement, number[][], any>
             //     )
+            // ;
+            // Add data line
+            // svgGroup.selectAll("mybar")
+            //     .data(data.filter(([x, y]) => y > Y_LIMIT).map(([x, y]) => ([x, Math.min(Y_LIMIT, y - Y_LIMIT)])))
+            //     // .datum(data)
+            //     .enter()
+            //     .append("rect")
+            //     .attr("y0", dimensions.height)
+            //     .attr("y1", ([x, y]) => yAxis(y))
+            //     .attr("x", ([x, y]) => xAxis(x))
+            //     // .attr("y", ([x, y]) => yAxis(y))
+            //     .attr("width", STROKE_WIDTH)
+            //     .attr("height", ([x, y]) => dimensions.height - yAxis(y))
+            //     .attr("fill", colors[key as Key])
+            //     .attr("opacity", 0.5)
             // ;
             // Tooltip
            const tooltip = select("body")
@@ -196,6 +224,7 @@ export default function Chart() {
                 .attr("cx", ([x, y]) => xAxis(x))
                 .attr("cy", ([x, y]) => yAxis(Math.min(y, Y_LIMIT)))
                 .attr("r", 5)
+                .attr("r", ([x, y]) => y > Y_LIMIT ? Math.min(10, 5 * y / Y_LIMIT) : 5)
                 .attr("fill", colors[key as Key])
                 .attr("stroke", "#111111")
                 .style("stroke-width", 1)
@@ -203,13 +232,14 @@ export default function Chart() {
                     const hourMinutes = new Date(d[0]).toLocaleTimeString().replace(":00 ", " ");
                     const minutes = Math.trunc(d[1]);
                     const seconds = Math.trunc((d[1] - minutes) * 60).toFixed().padStart(2, '0');
-                    const tooltipContent = `<b>${keyLabels.find(({key: k}) => k === key)?.label}</b> @ ${hourMinutes}
-                    <br><b>Wait Time:</b> ${minutes.toFixed().padStart(2, '0')}:${seconds}
+                    const tooltipContent = `
+                        <b>${keyLabels.find(({key: k}) => k === key)?.label}</b> @ ${hourMinutes}
+                        <br><b>Wait Time:</b> ${minutes.toFixed().padStart(2, '0')}:${seconds}
                     `;
                     tooltip.html(tooltipContent)
                         .style("left", `${event.pageX - 48}px`)
                         .style("top", `${event.pageY - 96}px`)
-                        .style("border", `1px solid ${colors[key as Key]}bb`)
+                        .style("border", `1px solid ${colors[key as Key]}cc`)
                         .style("opacity", 1.0);
                 })
                 .on("mouseout", () => {
@@ -270,11 +300,11 @@ export default function Chart() {
             </section>
             <section className="col-12 vstack">
                 <div className="d-flex justify-content-center">
-                    <Base svgRef={svgRef} margin={margin} dimensions={dimensions}>
+                    <ChartBase svgRef={svgRef} margin={margin} dimensions={dimensions}>
                         <LayoutYAxis y={yAxis} dimensions={dimensions} />
                         <LayoutXAxis x={xAxis} dimensions={dimensions} />
-                        <NowLine svgRef={lineRef} x2={xAxis(nowYesterday)} y2={height} />
-                    </Base>
+                        <NowLine svgRef={lineRef} xAxis={xAxis} y2={dimensions.height} />
+                    </ChartBase>
                 </div>
                 <div className="gap-2 d-flex justify-content-around">
                     <p className="form-text">{dates.yesterday} to {dates.today} UTC {dates.kind} data.</p>
