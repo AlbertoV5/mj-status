@@ -85,8 +85,8 @@ const NowLine = ({svgRef, xAxis, y2}: {svgRef: React.RefObject<SVGLineElement>, 
             .attr("y2", y2)
             .style("stroke-width", STROKE_WIDTH)
             .style("stroke", color)
-            // .style("stroke-dasharray", 6)
-            .style("opacity", 0.5)
+            .style("stroke-dasharray", 5)
+            .style("opacity", 0.7)
             .style("fill", "none")
         ;
     }
@@ -157,7 +157,7 @@ export default function Chart() {
         const svg = select(svgRef.current);
         selected.forEach(({key, sel}) => {
             // create [x, y] data
-            const rightPad = chartData[key as Key].slice(-1)[0];
+            const rightPad = chartData[key as Key][0];
             const data = [...chartData[key as Key], rightPad].map((value, i) => ([startOfYesterday + (i * x_INTERVAL), value]));
             // create group, initially hidden
             const svgGroup = svg.append("g").style("opacity", "0");
@@ -192,7 +192,7 @@ export default function Chart() {
             //         .y(([x, y]) => yAxis(y)) as ValueFn<SVGPathElement, number[][], any>
             //     )
             // ;
-            // Add data line
+            // Add clipped bar
             // svgGroup.selectAll("mybar")
             //     .data(data.filter(([x, y]) => y > Y_LIMIT).map(([x, y]) => ([x, Math.min(Y_LIMIT, y - Y_LIMIT)])))
             //     // .datum(data)
@@ -216,7 +216,7 @@ export default function Chart() {
                 .style("padding", "10px")
                 .style("pointer-events", "none")
             ;
-            // Points
+            // Scatter
             svgGroup.append("g")
                 .selectAll("dot")
                 .data(data)
@@ -224,9 +224,10 @@ export default function Chart() {
                 .attr("cx", ([x, y]) => xAxis(x))
                 .attr("cy", ([x, y]) => yAxis(Math.min(y, Y_LIMIT)))
                 .attr("r", 5)
-                .attr("r", ([x, y]) => y > Y_LIMIT ? Math.min(10, 5 * y / Y_LIMIT) : 5)
+                // .attr("r", ([x, y]) => y > Y_LIMIT ? Math.min(10, 5 * y / Y_LIMIT) : 5)
                 .attr("fill", colors[key as Key])
                 .attr("stroke", "#111111")
+                // .attr("stroke", ([x, y]) => y > Y_LIMIT ? "#ffffff" : "#111111")
                 .style("stroke-width", 1)
                 .on("mouseover", (event: PointerEvent, d: any) => {
                     const hourMinutes = new Date(d[0]).toLocaleTimeString().replace(":00 ", " ");
@@ -258,6 +259,8 @@ export default function Chart() {
         selected.forEach(({key, sel}) => {
             // toggle visibility with a 400 ms fade effect
             svgGroups[key as Key]?.transition("ease").duration(400).style("opacity", sel ? "1" : "0");
+            svgGroups[key as Key]?.raise();
+            if (lineRef.current) select(lineRef.current).raise();
         });
     }, [selected])
 
@@ -303,7 +306,7 @@ export default function Chart() {
                     <ChartBase svgRef={svgRef} margin={margin} dimensions={dimensions}>
                         <LayoutYAxis y={yAxis} dimensions={dimensions} />
                         <LayoutXAxis x={xAxis} dimensions={dimensions} />
-                        <NowLine svgRef={lineRef} xAxis={xAxis} y2={dimensions.height} />
+                        <NowLine svgRef={lineRef} xAxis={xAxis} y2={dimensions.height + 20} />
                     </ChartBase>
                 </div>
                 <div className="gap-2 d-flex justify-content-around">
