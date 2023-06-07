@@ -1,4 +1,6 @@
-import React from 'react'
+import { Icon } from "astro-icon"
+const githubLink = "https://github.com/albertoV5"
+
 
 export const HomeButton = () => {
     return (
@@ -7,10 +9,17 @@ export const HomeButton = () => {
         </span>
     )
 }
-export const BuildButton = () => {
+export const ProjectsButton = () => {
     return (
-        <a className="btn btn-outline-light me-2" href="/stats/mj">
-            Stats
+        <a className="btn btn-outline-light me-2" href="/projects">
+            Projects
+        </a>
+    )
+}
+export const BlogButton = () => {
+    return (
+        <a className="btn btn-primary me-2" href="/blog">
+            Blog
         </a>
     )
 }

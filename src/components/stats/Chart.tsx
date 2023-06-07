@@ -119,7 +119,7 @@ const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
 }
 
 // Constants
-const Y_LIMIT = 10;
+const Y_LIMIT = 15;
 const STROKE_WIDTH = 2;
 const x_INTERVAL = 15 * 60 * 1000;
 // Datetime
@@ -159,8 +159,10 @@ export default function Chart() {
             // create [x, y] data
             const rightPad = chartData[key as Key][0];
             const data = [...chartData[key as Key], rightPad].map((value, i) => ([startOfYesterday + (i * x_INTERVAL), value]));
-            // create group, initially hidden
-            const svgGroup = svg.append("g").style("opacity", "0");
+            // create group, initially hidden and disabled
+            const svgGroup = svg.append("g")
+                .style("opacity", "0")
+                .style("pointer-events", "none")
             svgGroups[key as Key] = svgGroup;
             // add the area
             svgGroup.append("path")
@@ -258,7 +260,10 @@ export default function Chart() {
         if (!selected) return;
         selected.forEach(({key, sel}) => {
             // toggle visibility with a 400 ms fade effect
-            svgGroups[key as Key]?.transition("ease").duration(400).style("opacity", sel ? "1" : "0");
+            svgGroups[key as Key]?.transition("ease").duration(400)
+                .style("opacity", sel ? "1" : "0")
+                .style("pointer-events", sel ? "all" : "none")
+            ;
             svgGroups[key as Key]?.raise();
             if (lineRef.current) select(lineRef.current).raise();
         });
