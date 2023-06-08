@@ -10,6 +10,7 @@ import { axisBottom, axisLeft, curveBasis, timeFormat } from "d3";
 import type { ScaleLinear, ScaleTime, ValueFn, Selection } from "d3";
 // store
 import { storeSelected, loadSelected } from "./store";
+import { Selector } from "./components/Selector";
 
 interface ChartBaseProps {
     svgRef: React.RefObject<SVGSVGElement>,
@@ -271,41 +272,13 @@ export default function Chart() {
 
     return (
         <section className="row vstack gap-2">
-            <section className="container hstack gap-2 d-flex justify-content-center align-content-center flex-wrap">
-                <div className='form-check form-check-inline'>
-                    <input
-                        className='btn-check' 
-                        id={`btn-check-unselect`}
-                        type='checkbox'
-                        onChange={(e) => setSelected(prev => {
-                            const s = prev.map((s) => ({...s, sel: false}));
-                            storeSelected(s);
-                            return s;
-                        })}
-                        checked={!selected.find(({sel}) => sel === true)}
-                    />
-                    <label className='btn btn-outline-secondary' htmlFor={`btn-check-unselect`}>Reset</label>
-                </div>
-            {
-                keyLabels.map(({key: k, label}) => (
-                    <div key={k} className='form-check form-check-inline hstack gap-2'>
-                        <input
-                            className='btn-check' 
-                            id={`btn-check-${k}`}
-                            type='checkbox'
-                            onChange={() => setSelected(prev => {
-                                const s = [...prev.filter(({key}) => key !== k), {key: k, sel: !prev.find(({key}) => key === k)?.sel}]
-                                storeSelected(s);
-                                return s;
-                            })}
-                            checked={selected.find(({key}) => key === k)?.sel}
-                        />
-                        <label className='btn btn-outline-primary'htmlFor={`btn-check-${k}`}>{label}</label>
-                        <svg style={{width: '15px', height: '15px', borderRadius: '50%', backgroundColor: colors[k as Key]}}></svg>
-                    </div>
-                ))
-            }
-            </section>
+            <Selector 
+                selected={selected}
+                setSelected={setSelected}
+                keyLabels={keyLabels}
+                colors={colors}
+                storeSelected={storeSelected}
+            />
             <section className="col-12 vstack">
                 <div className="d-flex justify-content-center">
                     <ChartBase svgRef={svgRef} margin={margin} dimensions={dimensions}>

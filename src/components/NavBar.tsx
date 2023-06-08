@@ -13,7 +13,7 @@ const Buttons = ({mobile=false}: {mobile?: boolean}) => (
 )
 export const NavBar = () => {
     return (
-        <section className="navbar bg-dark shadow-sm mb-2">
+        <section className="navbar bg-dark shadow-sm border border-dark mb-2">
             <section className="container-fluid">
                 <Buttons></Buttons>
                 <section className='d-flex d-md-none'>
