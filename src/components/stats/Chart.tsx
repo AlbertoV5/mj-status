@@ -120,7 +120,7 @@ const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
 }
 
 // Constants
-const Y_LIMIT = 15;
+const Y_LIMIT = 16;
 const STROKE_WIDTH = 2;
 const x_INTERVAL = 15 * 60 * 1000;
 // Datetime
@@ -223,8 +223,6 @@ export default function Chart() {
             if (lineRef.current) select(lineRef.current).raise();
         })
         return () => {
-            // useSetReferences((prev) => prev.map((p) => ({...p, refs: []})))
-            // svg.selectAll("path").remove();
         }
     }, [chartData])
 
