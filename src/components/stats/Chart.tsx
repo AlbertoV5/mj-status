@@ -139,7 +139,7 @@ export default function Chart() {
     // dimensions (client-only)
     const {width, height} = useWindowDimensions();
     const margin = {top: 30, right: height > width ? 20 : 40, bottom: 30, left: height > width ? 20 : 40};
-    const dimensions = {width: (width * 0.98) - margin.left - margin.right, height: height * 0.66 - margin.top - margin.bottom}
+    const dimensions = {width: (width * 0.98) - margin.left - margin.right, height: height * 0.6 - margin.top - margin.bottom}
     // axis
     const xAxis = getXAxis(startOfYesterday, startOfToday, dimensions);
     const yAxis = getYAxis(Y_LIMIT, dimensions);
@@ -182,35 +182,6 @@ export default function Chart() {
                         .y1(([x, y]) => yAxis(Math.min(y, Y_LIMIT))) as ValueFn<SVGPathElement, number[][], any>
                 )
             ;
-            // // Add data line
-            // svgGroup.append("path")
-            //     .datum(data.filter(([x, y]) => y > Y_LIMIT).map(([x, y]) => ([x, y - Y_LIMIT])))
-            //     // .datum(data)
-            //     .attr("fill", "none")
-            //     .attr("stroke", "#aa0000")
-            //     .attr("stroke-width", 2)
-            //     .attr("d", line()
-            //         // .curve(curveBasis)
-            //         .x(([x, y]) => xAxis(x))
-            //         .y(([x, y]) => yAxis(y)) as ValueFn<SVGPathElement, number[][], any>
-            //     )
-            // ;
-            // Add clipped bar
-            // svgGroup.selectAll("mybar")
-            //     .data(data.filter(([x, y]) => y > Y_LIMIT).map(([x, y]) => ([x, Math.min(Y_LIMIT, y - Y_LIMIT)])))
-            //     // .datum(data)
-            //     .enter()
-            //     .append("rect")
-            //     .attr("y0", dimensions.height)
-            //     .attr("y1", ([x, y]) => yAxis(y))
-            //     .attr("x", ([x, y]) => xAxis(x))
-            //     // .attr("y", ([x, y]) => yAxis(y))
-            //     .attr("width", STROKE_WIDTH)
-            //     .attr("height", ([x, y]) => dimensions.height - yAxis(y))
-            //     .attr("fill", colors[key as Key])
-            //     .attr("opacity", 0.5)
-            // ;
-            // Tooltip
            const tooltip = select("body")
                 .append("div")
                 .attr("class", "bg-dark")
@@ -272,13 +243,6 @@ export default function Chart() {
 
     return (
         <section className="row vstack gap-2">
-            <Selector 
-                selected={selected}
-                setSelected={setSelected}
-                keyLabels={keyLabels}
-                colors={colors}
-                storeSelected={storeSelected}
-            />
             <section className="col-12 vstack">
                 <div className="d-flex justify-content-center">
                     <ChartBase svgRef={svgRef} margin={margin} dimensions={dimensions}>
@@ -291,6 +255,13 @@ export default function Chart() {
                     <p className="form-text">{dates.yesterday} to {dates.today} UTC {dates.kind} data.</p>
                 </div>
             </section>
+            <Selector
+                selected={selected}
+                setSelected={setSelected}
+                keyLabels={keyLabels}
+                colors={colors}
+                storeSelected={storeSelected}
+            />
         </section>
     )
 }
