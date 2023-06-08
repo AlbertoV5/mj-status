@@ -2,8 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { Icon } from 'astro-icon'
 
-const pageName = "Promptry";
-const pageNameArray = Array.from(pageName).sort();
+const pageName = "promptry";
 const projectsLink = "/projects";
 const blogLink = "/blog";
 const quotes = [
@@ -23,15 +22,15 @@ const quotes = [
 		<section class="row bg-white text-dark py-5">
 			<aside class="col-md-3"></aside>
 			<section class="col-md-6">
-				<header class="vstack gap-2 text-center">
+				<header class="vstack gap-3 text-center">
 					<section class="hstack gap-2 d-flex justify-content-center">
 						<Icon name="datamodel" />
-						<h1 id="landing-title" class="landing-title">{pageName}</h1>
+						<h1 id="landing-title" class="landing-title ">{pageName}</h1>
 					</section>
 					<p id="landing-subtitle"></p>
 					<section class="hstack gap-2 d-flex justify-content-center">
 						<a href={projectsLink} class="btn btn-outline-dark">Projects</a>
-						<a href={blogLink} class="btn btn-primary border border-dark">Blog</a>
+						<a href={blogLink} class="btn btn-primary">Blog</a>
 					</section>
 				</header>
 			</section>
@@ -74,7 +73,7 @@ const quotes = [
 				}, 100); // Delay the next iteration by 1 second
 			}
 		}
-		insertionSortAnimated(array);
+		// insertionSortAnimated(array);
 	}
 	const writer = () => {
 		const subtitle = 'Learning Data Analytics and Web Development';
