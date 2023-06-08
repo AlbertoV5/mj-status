@@ -2,20 +2,8 @@
 import Layout from '../../../layouts/Layout.astro';
 import Chart from "../../../components/stats/Chart";
 
-const pageName = "MJStatus"
+const pageName = "MJ Stats";
 ---
-<style is:global>
-	.tooltip {
-		position: absolute;
-		padding: 8px;
-		pointer-events: none; /* Ensure the tooltip doesn't interfere with mouse events on plot points */
-	}
-	.tick:first-of-type line{
-		fill: none;
-		stroke: none;
-	}
-</style>
-
 <Layout title={pageName}>
 	<main class="container-fluid">
 		<header class="row px-4 py-2 text-center vstach gap-2">
