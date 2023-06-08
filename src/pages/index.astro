@@ -3,15 +3,20 @@ import Layout from '../layouts/Layout.astro';
 import { Icon } from 'astro-icon'
 
 const pageName = "Promptry";
+const pageNameArray = Array.from(pageName).sort();
 const projectsLink = "/projects";
 const blogLink = "/blog";
 const quotes = [
 	{
-		author: "Some LLM",
+		author: "GPT 3.5",
 		content: "Get your data groove on: expert analytics, development, and more."
 	}
 ]
 ---
+
+<style is:global>
+
+</style>
 
 <Layout title={pageName}>
 	<main class="container-fluid">
@@ -20,13 +25,13 @@ const quotes = [
 			<section class="col-md-6">
 				<header class="vstack gap-2 text-center">
 					<section class="hstack gap-2 d-flex justify-content-center">
-						<h1 class="landing-title">{pageName}</h1>
-						<!-- <Icon name="datamodel" /> -->
+						<Icon name="datamodel" />
+						<h1 id="landing-title" class="landing-title">{pageName}</h1>
 					</section>
 					<p id="landing-subtitle"></p>
 					<section class="hstack gap-2 d-flex justify-content-center">
 						<a href={projectsLink} class="btn btn-outline-dark">Projects</a>
-						<a href={blogLink} target="_blank" class="btn btn-primary">Blog</a>
+						<a href={blogLink} class="btn btn-primary border border-dark">Blog</a>
 					</section>
 				</header>
 			</section>
@@ -50,6 +55,27 @@ const quotes = [
 </Layout>
 
 <script is:inline>
+	const title = () => {
+		const pageName = "promptry";
+		const array = Array.from(pageName).map((x, i) => ({w: x, c: x.charCodeAt(0), i: i})).sort((a, b) => (a.c - b.c));
+		const h1 = document.getElementById('landing-title');
+		function insertionSortAnimated(array, i = 1) {
+			if (i < array.length) {
+				let j = i - 1;
+				let temp = array[i];
+				while (j >= 0 && array[j].i > temp.i) {
+					array[j + 1] = array[j];
+					j--;
+				}
+				array[j + 1] = temp;
+				h1.textContent = array.map(x => x.w).join('')
+				setTimeout(() => {
+					insertionSortAnimated(array, i + 1);
+				}, 100); // Delay the next iteration by 1 second
+			}
+		}
+		insertionSortAnimated(array);
+	}
 	const writer = () => {
 		const subtitle = 'Learning Data Analytics and Web Development';
 		const p = document.getElementById('landing-subtitle');
@@ -65,6 +91,7 @@ const quotes = [
 	const quotes = () => {
 		console.log("quotes");
 	}
+	title();
 	writer();
 	quotes();
 </script>
