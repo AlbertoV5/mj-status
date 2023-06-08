@@ -6,20 +6,21 @@ $primary: #79cee9;
 $secondary: #cdd0d1;
 $danger: #e97e90;
 $success: #72cea3;
-$black: #1a1a1a;
 $dark: #202125;
+$black: #050505;
+// $black: #1a1a1a;
 
 @import "../../node_modules/bootstrap/scss/bootstrap.scss";
 
 .landing-title {
-    font-size: 4em;
+    font-size: 5em;
     font-family: 'Montserrat', 'Courier New', Courier, monospace;
 }
 .gradient-text {
-	background: linear-gradient(45deg, $dark, #0077b6, #09b3d5, $primary);
+	background: linear-gradient(45deg, #052e45, #014d7d, #0092b6, $primary);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
-	background-size: 300% 300%;
+	background-size: 400% 400%;
 	animation: gradient 10s ease-in-out infinite;
 }
 

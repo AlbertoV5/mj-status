@@ -1,1 +1,1 @@
-aws s3 sync s3://$MJ_STATUS_BUCKET ./public
+aws s3 sync s3://$MJ_STATUS_BUCKET/metrics ./public/metrics
