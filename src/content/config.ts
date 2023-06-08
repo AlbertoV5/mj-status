@@ -8,10 +8,6 @@ const articlesCollection = defineCollection({
         image: z.string().optional(),
     }),
 });
-const slots = z.object({
-    name: z.string(),
-    component: z.string(),
-})
 const projectsCollection = defineCollection({
     type: 'content',
     schema: z.object({
@@ -19,6 +15,7 @@ const projectsCollection = defineCollection({
         summary: z.string(),
         tags: z.array(z.string()),
         thumbnail: z.string(),
+        date: z.date(),
     }),
 });
 export const collections = {

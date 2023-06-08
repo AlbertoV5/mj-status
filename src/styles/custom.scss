@@ -57,6 +57,11 @@ $black: #050505;
 .btn-outline-secondary:active {
     color: $light;
 }
+.project-card:hover {
+    cursor: pointer;
+    box-shadow: #050505 10px 10px;
+}
+
 @include media-breakpoint-up(sm) {
     .output-text {
         height: 40vh;

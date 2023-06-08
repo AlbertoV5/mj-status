@@ -1,11 +1,20 @@
 import React from 'react'
 
-export const ProjectCard = ({title, summary, image, link}: {title: string, summary: string, image: string, link: string}) => {
+interface ProjectCardProps {
+    date: Date
+    title: string
+    tags: string[]
+    summary: string
+    link: string
+    thumbnail: string
+}
+
+export const ProjectCard = ({date, title, tags, summary, link, thumbnail}: ProjectCardProps) => {
     const handleClick = () => {
         window.open(link)
     }
     return (
-        <section id="project-card" onClick={handleClick} className="card text-bg-dark shadow-sm hstack gap-2">
+        <li onClick={handleClick} className="card text-bg-dark shadow-sm hstack gap-2 project-card">
             <section className="card-body col-6">
                 <a href={link} style={{textDecoration: "none"}}>
                     <h3 className="card-title">{title}</h3>
@@ -14,9 +23,9 @@ export const ProjectCard = ({title, summary, image, link}: {title: string, summa
             </section>
             <section className='col-6'>
                 <a href={link}>
-                    <img src={image} className="card-img-top" style={{width: "100%"}} alt={title}/>
+                    <img src={thumbnail} className="card-img-top" style={{width: "100%"}} alt={title}/>
                 </a>
             </section>
-        </section>
+        </li>
     )
 }
