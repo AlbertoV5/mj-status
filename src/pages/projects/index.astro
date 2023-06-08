@@ -4,10 +4,6 @@ import { ProjectCard } from "../../components/global/ProjectCard";
 import { getCollection } from 'astro:content';
 
 const projects = await getCollection('projects');
-// const images = await Astro.glob("../../images/projects/**/thumb*[jp][ne][g]*").then(files => {
-//   return files.map(file => file.default);
-// });
-// console.log(images);
 ---
 <Layout title={'Projects'}>
 	<main class="container-fluid pt-4">
@@ -16,11 +12,13 @@ const projects = await getCollection('projects');
 			<section class="col-md-6">
 				<ul class="list-group">
 					{projects.map(project => (
-						<ProjectCard
-							{...project.data} 
-							link={`projects/${project.slug}`}
-							thumbnail={`/src/images/projects/${project.data.thumbnail}`}
-						/>
+						<li class="list-group-item p-1 border-0 project-wrapper">
+							<ProjectCard
+								{...project.data} 
+								link={`projects/${project.slug}`}
+								thumbnail={`/src/images/projects/${project.data.thumbnail}`}
+							/>
+						</li>
 					))}
 				</ul>
 			</section>
