@@ -4,7 +4,7 @@ import { CollectionEntry, getCollection } from 'astro:content';
 
 
 export async function getStaticPaths() {
-	const articles = await getCollection("article", ({ data }) => {
+	const articles = await getCollection("articles", ({ data }) => {
 		return data;
 	})
 	return articles.map((article) => ({
@@ -13,7 +13,7 @@ export async function getStaticPaths() {
 	}))
 }
 interface Props {
-	article: CollectionEntry<"article">;
+	article: CollectionEntry<"articles">;
 }
 const { article } = Astro.props;
 const { Content } = await article.render();

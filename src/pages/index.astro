@@ -1,10 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { Icon } from 'astro-icon'
+import { ArticlesButton, ProjectsButton } from '../components/global/Buttons';
 
 const pageName = "promptry";
-const projectsLink = "/project";
-const blogLink = "/article";
 const quotes = [
 	{
 		author: "GPT 3.5",
@@ -12,11 +11,6 @@ const quotes = [
 	}
 ]
 ---
-
-<style is:global>
-
-</style>
-
 <Layout title={pageName}>
 	<main class="container-fluid">
 		<section class="row bg-white text-dark py-5">
@@ -29,8 +23,8 @@ const quotes = [
 					</section>
 					<p id="landing-subtitle"></p>
 					<section class="hstack gap-2 d-flex justify-content-center">
-						<a href={projectsLink} class="btn btn-outline-dark">Projects</a>
-						<a href={blogLink} class="btn btn-primary">Blog</a>
+						<ArticlesButton dark/>
+						<ProjectsButton dark/>
 					</section>
 				</header>
 			</section>

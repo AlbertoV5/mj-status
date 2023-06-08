@@ -1,10 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import Project from "../../layouts/Project.astro"
 import { CollectionEntry, getCollection } from 'astro:content';
 
-
 export async function getStaticPaths() {
-	const projects = await getCollection("project", ({ data }) => {
+	const projects = await getCollection("projects", ({ data }) => {
 		return data;
 	})
 	return projects.map((project) => ({
@@ -13,19 +13,13 @@ export async function getStaticPaths() {
 	}))
 }
 interface Props {
-	project: CollectionEntry<"project">;
+	project: CollectionEntry<"projects">;
 }
 const { project } = Astro.props;
 const { Content } = await project.render();
 ---
-<Layout title={project.data.title}>
+<Project title={project.data.title}>
 	<main class="container-fluid pt-4">
-		<section class="row">
-			<aside class="col-md-3"></aside>
-			<section class="col-md-6">
-				<Content/>
-			</section>
-			<aside class="col-md-3"></aside>
-		</section>
+		<Content/>
 	</main>
-</Layout>
+</Project>

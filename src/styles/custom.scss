@@ -3,7 +3,7 @@
 
 $primary: #79cee9;
 // $primary: #98daee;
-$secondary: #cdd0d1;
+$secondary: #018bb5;
 $danger: #e97e90;
 $success: #72cea3;
 $dark: #202125;
@@ -17,7 +17,7 @@ $black: #050505;
     font-family: 'Montserrat', 'Courier New', Courier, monospace;
 }
 .gradient-text {
-	background: linear-gradient(45deg, #052e45, #014d7d, #0092b6, $primary);
+	background: linear-gradient(45deg, #052e45, #014d7d, #018bb5, $primary);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-size: 400% 400%;
@@ -50,6 +50,12 @@ $black: #050505;
 }
 .button-fix {
     padding-bottom: 8px;
+}
+.btn-outline-secondary:hover {
+    color: $light;
+}
+.btn-outline-secondary:active {
+    color: $light;
 }
 @include media-breakpoint-up(sm) {
     .output-text {

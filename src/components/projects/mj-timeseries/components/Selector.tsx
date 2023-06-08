@@ -1,5 +1,5 @@
 import type React from 'react'
-import type { Key } from '../util'
+import type { Key } from '../utils'
 
 interface SelectorProps {
     selected: {key: string, sel: boolean}[]
@@ -24,7 +24,7 @@ export const Selector = ({selected, setSelected, keyLabels, colors, storeSelecte
                     })}
                     checked={!selected.find(({sel}) => sel === true)}
                 />
-                <label className='btn btn-outline-secondary' htmlFor={`btn-check-unselect`}>Reset</label>
+                <label className='btn btn-outline-light' htmlFor={`btn-check-unselect`}>Reset</label>
             </div>
         {
             keyLabels.map(({key: k, label}) => (

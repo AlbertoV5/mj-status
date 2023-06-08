@@ -9,17 +9,19 @@ export const HomeButton = () => {
         </span>
     )
 }
-export const ProjectsButton = () => {
+export const ProjectsButton = ({dark=false}: {dark?: boolean}) => {
+    const href = "/projects";
     return (
-        <a className="btn btn-outline-light me-2" href="/projects">
+        <a className={`btn me-2 ${dark ? "btn-outline-secondary" : "btn-outline-primary"}`} href={href}>
             Projects
         </a>
     )
 }
-export const BlogButton = () => {
+export const ArticlesButton = ({dark=false}: {dark?: boolean}) => {
+    const href = "/articles";
     return (
-        <a className="btn btn-primary me-2" href="/blog">
-            Blog
+        <a className={`btn me-2 ${dark ? "btn-outline-dark" : "btn-outline-light"}`} href={href}>
+            Articles
         </a>
     )
 }
