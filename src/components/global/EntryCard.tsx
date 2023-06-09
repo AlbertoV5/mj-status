@@ -21,7 +21,7 @@ export const EntryCard = ({data, slug, children=null}: EntryCardProps) => {
                 <section className="card-body col-6 d-flex flex-column justify-content-center">
                     <h3 className="card-title project-card-title">{data.title}</h3>
                     <p className='form-text pb-2' style={{lineHeight: "0.5rem"}}>
-                        {`Date: ${data.date.toDateString()}`}
+                        {`${data.date.toDateString()}`}
                     </p>
                     <p className="card-text pb-2">{data.summary}</p>
                     {/* <p className='form-text pb-1' style={{lineHeight: "0.4rem"}}>
