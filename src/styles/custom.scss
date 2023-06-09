@@ -1,5 +1,5 @@
-// Import Bootstrap and its default variables
-// @import 'bootstrap/scss/bootstrap.scss';
+// Including all of bootstrap to simplify styling.
+@import "bootstrap/scss/bootstrap";
 
 $primary: #79cee9;
 $white: #eeeeee;
@@ -12,7 +12,13 @@ $dark: #202125;
 $black: #000000;
 // $black: #1a1a1a;
 
-@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+// Color mode variables in _root.scss
+@include color-mode(dark) {
+    // CSS variable overrides here...
+    $primary: #79cee9;
+}
+
+// Custom
 
 .landing-title {
     font-size: 5em;
@@ -117,3 +123,126 @@ $black: #000000;
         height: 25vh;
     }
 }
+
+
+
+
+// // Import Bootstrap and its default variables
+// // @import 'bootstrap/scss/bootstrap.scss';
+
+// $primary: #79cee9;
+// $white: #eeeeee;
+// // $primary: #98daee;
+// $secondary: #018bb5;
+// $danger: #e97e90;
+// $success: #72cea3;
+// // $dark: #262832;
+// $dark: #202125;
+// $black: #000000;
+// // $black: #1a1a1a;
+
+// @import "../../node_modules/bootstrap/scss/bootstrap.scss";
+
+// .landing-title {
+//     font-size: 5em;
+//     font-family: 'Montserrat', 'Courier New', Courier, monospace;
+// }
+// .gradient-text {
+// 	background: linear-gradient(45deg, #052e45, #014d7d, #018bb5, $primary);
+// 	-webkit-background-clip: text;
+// 	-webkit-text-fill-color: transparent;
+// 	background-size: 400% 400%;
+// 	animation: gradient 5s ease-in-out infinite;
+// }
+// .project-wrapper {
+// 	background: linear-gradient(45deg, #cdcdda, #58585d, #adadb8, #cdcdda);
+// 	// background: linear-gradient(45deg, $primary, #014d7d, $secondary, $primary);
+// 	background-size: 200% 200%;
+// 	// animation: gradient 10s ease-in-out infinite;
+//     // transition: 0.5s ease;
+// }
+// .project-wrapper:hover {
+// 	background: linear-gradient(45deg, $primary, #a4d4e2, $secondary, $primary);
+// 	background-size: 200% 200%;
+// 	// animation: gradient 10s ease-in-out infinite;
+//     // transition: 0.5s ease;
+// }
+// .project-card {
+//     background-color: #202125;
+//     opacity: 1.0;
+//     background-image: radial-gradient(#303034 0.5px, #202125 0.5px);
+//     background-size: 10px 10px;
+// }
+// @keyframes project-card-movement {
+// 	0% {
+// 		background-position: 0% 50%;
+// 	}
+// 	100% {
+// 		background-position: 100% 50%;
+// 	}
+// }
+// .project-card-title {
+//     // font-family: 'Montserrat', 'Courier New', Courier, monospace;
+//     font-size: x-large;
+// }
+// @keyframes gradient {
+// 	0% {
+// 		background-position: 0% 50%;
+// 	}
+// 	50% {
+// 		background-position: 100% 50%;
+// 	}
+// 	100% {
+// 		background-position: 0% 50%;
+// 	}
+// }
+// [astro-icon] {
+//     width: 50px;
+//     height: 50px;
+//     margin-bottom: auto;
+//     margin-top: auto;
+//     margin-right: 0;
+//     margin-left: 0;
+//     fill: $dark;
+//     color: $dark;
+// }
+// .output-text {
+//     height: 45vh;
+// }
+// .button-fix {
+//     padding-bottom: 8px;
+// }
+// .btn-outline-secondary:hover {
+//     color: $light;
+// }
+// .btn-outline-secondary:active {
+//     color: $light;
+// }
+// .project-card:hover {
+//     cursor: pointer;
+//     box-shadow: #050505 10px 10px;
+// }
+
+// @include media-breakpoint-up(sm) {
+//     .output-text {
+//         height: 40vh;
+//     }
+// }
+// @include media-breakpoint-up(md) {
+//     .output-text {
+//         height: 35vh;
+//     }
+// }
+// @include media-breakpoint-up(lg) {
+//     .output-text {
+//         height: 30vh;
+//     }
+//     .button-fix {
+//         padding-bottom: 0px;
+//     }
+// }
+// @include media-breakpoint-up(xl) {
+//     .output-text {
+//         height: 25vh;
+//     }
+// }

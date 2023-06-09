@@ -1,10 +1,13 @@
 import React from 'react'
 
-import { HomeButton, ProjectsButton, ArticlesButton } from './Buttons'
+import { HomeButton, ProjectsButton, ArticlesButton, ThemeButton } from './Buttons'
 
 const Buttons = ({mobile=false}: {mobile?: boolean}) => (
     <section className={`container-fluid ${mobile ? 'd-flex d-md-none' : 'd-none d-md-flex'} justify-content-between`}>
-        <HomeButton></HomeButton>
+        <section className="hstack gap-1">
+            <HomeButton></HomeButton>
+            <ThemeButton></ThemeButton>
+        </section>
         <section className="hstack gap-1">
             <ArticlesButton></ArticlesButton>
             <ProjectsButton></ProjectsButton>
@@ -13,7 +16,7 @@ const Buttons = ({mobile=false}: {mobile?: boolean}) => (
 )
 export const NavBar = () => {
     return (
-        <section className="navbar bg-dark shadow-sm border border-dark mb-2">
+        <section className="navbar shadow-sm border-bottom mb-2">
             <section className="container-fluid">
                 <Buttons></Buttons>
                 <section className='d-flex d-md-none'>

@@ -1,18 +1,16 @@
 import { Icon } from "astro-icon"
-const githubLink = "https://github.com/albertoV5"
-
 
 export const HomeButton = () => {
     return (
         <span className="navbar-brand">
-            <a className='btn btn-outline-light me-2' href='/'>Home</a>
+            <a className='btn btn-outline-secondary me-2' href='/'>Home</a>
         </span>
     )
 }
 export const ProjectsButton = ({dark=false}: {dark?: boolean}) => {
     const href = "/projects";
     return (
-        <a className={`btn me-2 ${dark ? "btn-outline-secondary" : "btn-outline-primary"}`} href={href}>
+        <a className={`btn me-2 btn-outline-primary`} href={href}>
             Projects
         </a>
     )
@@ -20,15 +18,18 @@ export const ProjectsButton = ({dark=false}: {dark?: boolean}) => {
 export const ArticlesButton = ({dark=false}: {dark?: boolean}) => {
     const href = "/articles";
     return (
-        <a className={`btn me-2 ${dark ? "btn-outline-dark" : "btn-outline-light"}`} href={href}>
+        <a className={`btn me-2 btn-outline-secondary`} href={href}>
             Articles
         </a>
     )
 }
-export const LoginButton = () => {
+export const ThemeButton = () => {
     return (
-        <a className="btn btn-outline-light me-2" href="/login">
-            Login
-        </a>
+        <button 
+            id="bd-theme"
+            className="btn btn-outline-secondary"
+        >
+            Theme
+        </button>
     )
 }
