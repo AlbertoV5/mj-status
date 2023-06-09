@@ -26,14 +26,14 @@ $black: #000000;
 	animation: gradient 5s ease-in-out infinite;
 }
 .project-wrapper {
-	background: linear-gradient(45deg, #adadb8, #58585d, #888890, #adadb8);
+	background: linear-gradient(45deg, #cdcdda, #58585d, #adadb8, #cdcdda);
 	// background: linear-gradient(45deg, $primary, #014d7d, $secondary, $primary);
 	background-size: 200% 200%;
 	// animation: gradient 10s ease-in-out infinite;
     // transition: 0.5s ease;
 }
 .project-wrapper:hover {
-	background: linear-gradient(45deg, $primary, #014d7d, $secondary, $primary);
+	background: linear-gradient(45deg, $primary, #a4d4e2, $secondary, $primary);
 	background-size: 200% 200%;
 	// animation: gradient 10s ease-in-out infinite;
     // transition: 0.5s ease;
