@@ -1,16 +1,24 @@
-// 1. Import utilities from `astro:content`
+// https://docs.astro.build/en/guides/content-collections/
 import { z, defineCollection } from 'astro:content';
-// 2. Define your collection(s)
-const blogCollection = defineCollection({
-    type: 'content', // v2.5.0 and later
+const articlesCollection = defineCollection({
+    type: 'content',
     schema: z.object({
-      title: z.string(),
-      tags: z.array(z.string()),
-      image: z.string().optional(),
+        title: z.string(),
+        tags: z.array(z.string()),
+        image: z.string().optional(),
     }),
-  });
-// 3. Export a single `collections` object to register your collection(s)
-//    This key should match your collection directory name in "src/content"
+});
+const projectsCollection = defineCollection({
+    type: 'content',
+    schema: z.object({
+        title: z.string(),
+        summary: z.string(),
+        tags: z.array(z.string()),
+        thumbnail: z.string(),
+        date: z.date(),
+    }),
+});
 export const collections = {
-  'blog': blogCollection,
+    'articles': articlesCollection,
+    'projects': projectsCollection
 };

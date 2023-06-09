@@ -1,36 +1,40 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { ProjectCard } from '../../components/ProjectCard';
-import statsmj from "../../images/statsmj.jpeg"
+import Layout from "../../layouts/Layout.astro";
+import { ProjectCard } from "../../components/global/ProjectCard";
+import { getCollection } from 'astro:content';
 
-const pageName = "Projects";
-const projects = [
-	{
-		title: "Midjourney Time Series",
-		summary: `
-		Estimate Midjourney wait times with time series data and neural networks.
-		`,
-		image: statsmj,
-		link: "/projects/mj"
-	}
-]
+const projects = await getCollection('projects');
 ---
-
-<Layout title={pageName}>
-	<main class="container-fluid pt-4">
-		<section class="row">
-			<aside class="col-md-3"></aside>
-			<section class="col-md-6 d-flex justify-content-center">
-				<section>
-					{
-						projects.map(p => (
-							<ProjectCard title={p.title} summary={p.summary}
-							image={p.image} link={p.link} />
-						))
-					}
-				</section>
+<Layout title={'Projects'}>
+	<main class="container-fluid">
+		<section class="row pt-5">
+			<section class="col-md-12">
+				<header class="vstack gap-3 text-center">
+					<section class="hstack gap-2 d-flex justify-content-center">
+						<h1>Projects</h1>
+					</section>
+					<p>Step-by-step projects with real-life applications and technical concepts.</p>
+					<section class="hstack gap-2 d-flex justify-content-center">
+					</section>
+				</header>
 			</section>
-			<aside class="col-md-3"></aside>
+		</section>
+		<section class="row pt-4">
+			<aside class="col-md-2"></aside>
+			<section class="col-md-8">
+				<ul class="list-group">
+					{projects.map(project => (
+						<li class="list-group-item list-group-item-dark border-0 project-wrapper" style="padding: 1px;">
+							<ProjectCard
+								{...project.data}
+								link={`projects/${project.slug}`}
+								thumbnail={`/src/images/projects/${project.data.thumbnail}`}
+							/>
+						</li>
+					))}
+				</ul>
+			</section>
+			<aside class="col-md-2"></aside>
 		</section>
 	</main>
 </Layout>

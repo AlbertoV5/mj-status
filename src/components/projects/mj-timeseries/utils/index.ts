@@ -1,4 +1,5 @@
-import * as d3 from "d3";
+import { json } from "d3";
+import { SITE_PREFIX } from "../../../config";
 
 export type PlotDatum = [number, number];
 export type Key = "kdpt_diffusion_anime" | "v4_anime_upscaler" | "v4_diffusion" | "v4_upscaler" | "v5_diffusion" | "v5_diffusion_anime";
@@ -34,7 +35,13 @@ interface DataResult {
     today: string;
     kind: "historical" | "predicted";
 }
-
+export const storeSelected = (data: {key:string, sel: boolean}[]) => {
+    localStorage.setItem(`${SITE_PREFIX}-selected`, JSON.stringify(data));
+}
+export const loadSelected = (): {key:string, sel: boolean}[] => {
+    const data = localStorage.getItem(`${SITE_PREFIX}-selected`);
+    return data ? JSON.parse(data) : undefined;
+}
 /** Returns data based on day offset. */
 export async function getChartData(path: string = "/metrics/relax", offset: number = 1): Promise<DataResult>{
     // Get date from current time minus offset days. UTC not needed, apparently.
@@ -45,7 +52,7 @@ export async function getChartData(path: string = "/metrics/relax", offset: numb
     // Construct file path.
     const dataURL = `${path}/${yesterday}_${today}.json`;
     try {
-        const data = await d3.json(dataURL) as Record<Key, number[]>;
+        const data = await json(dataURL) as Record<Key, number[]>;
         return {data: data, yesterday: yesterday, today: today, kind: offset === 0 ? "predicted" : "historical"}
     }
     catch {
