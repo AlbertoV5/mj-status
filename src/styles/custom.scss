@@ -6,8 +6,9 @@ $primary: #79cee9;
 $secondary: #018bb5;
 $danger: #e97e90;
 $success: #72cea3;
+// $dark: #262832;
 $dark: #202125;
-$black: #050505;
+$black: #000000;
 // $black: #1a1a1a;
 
 @import "../../node_modules/bootstrap/scss/bootstrap.scss";
@@ -21,12 +22,38 @@ $black: #050505;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-size: 400% 400%;
-	animation: gradient 10s ease-in-out infinite;
+	animation: gradient 5s ease-in-out infinite;
 }
 .project-wrapper {
-	background: linear-gradient(45deg, #052e45, #014d7d, $secondary, $primary);
+	background: linear-gradient(45deg, #adadb8, #58585d, #888890, #adadb8);
+	// background: linear-gradient(45deg, $primary, #014d7d, $secondary, $primary);
 	background-size: 200% 200%;
-	animation: gradient 10s ease-in-out infinite;
+	// animation: gradient 10s ease-in-out infinite;
+    // transition: 0.5s ease;
+}
+.project-wrapper:hover {
+	background: linear-gradient(45deg, $primary, #014d7d, $secondary, $primary);
+	background-size: 200% 200%;
+	// animation: gradient 10s ease-in-out infinite;
+    // transition: 0.5s ease;
+}
+.project-card {
+    background-color: #202125;
+    opacity: 1.0;
+    background-image: radial-gradient(#303034 0.5px, #202125 0.5px);
+    background-size: 10px 10px;
+}
+@keyframes project-card-movement {
+	0% {
+		background-position: 0% 50%;
+	}
+	100% {
+		background-position: 100% 50%;
+	}
+}
+.project-card-title {
+    // font-family: 'Montserrat', 'Courier New', Courier, monospace;
+    font-size: x-large;
 }
 @keyframes gradient {
 	0% {
