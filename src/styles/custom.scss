@@ -1,21 +1,36 @@
-// Including all of bootstrap to simplify styling.
+// scss-docs-start theme-color-variables
+$primary:       #79cee9 !default;
+$secondary:     #dddddd !default;
+$success:       #72cea3 !default;
+$info:          #6190ee !default;
+$warning:       #dede38 !default;
+$danger:        #e97e90 !default;
+$dark:          #202125 !default;
+$black:         #000000 !default;
+$light:         #eeeeee !default;
+$white:         #ffffff !default;
+
+// dark-mode text
+$body-color-dark: #eeeeee !default;
+
 @import "bootstrap/scss/bootstrap";
 
-$primary: #79cee9;
-$white: #eeeeee;
-// $primary: #98daee;
-$secondary: #018bb5;
-$danger: #e97e90;
-$success: #72cea3;
-// $dark: #262832;
-$dark: #202125;
-$black: #000000;
-// $black: #1a1a1a;
-
-// Color mode variables in _root.scss
-@include color-mode(dark) {
-    // CSS variable overrides here...
-    $primary: #79cee9;
+[astro-icon] {
+    width: 50px;
+    height: 50px;
+    margin-bottom: auto;
+    margin-top: auto;
+    margin-right: 0;
+    margin-left: 0;
+    fill: $white;
+    color: $white;
+}
+$color-mode-type: data;
+@include color-mode(light) {
+    [astro-icon] {
+        fill: $dark;
+        color: $dark;
+    }
 }
 
 // Custom
@@ -73,28 +88,18 @@ $black: #000000;
 		background-position: 0% 50%;
 	}
 }
-[astro-icon] {
-    width: 50px;
-    height: 50px;
-    margin-bottom: auto;
-    margin-top: auto;
-    margin-right: 0;
-    margin-left: 0;
-    fill: $dark;
-    color: $dark;
-}
 .output-text {
     height: 45vh;
 }
-.button-fix {
-    padding-bottom: 8px;
-}
-.btn-outline-secondary:hover {
-    color: $light;
-}
-.btn-outline-secondary:active {
-    color: $light;
-}
+// .button-fix {
+//     padding-bottom: 8px;
+// }
+// .btn-outline-secondary:hover {
+//     color: $light;
+// }
+// .btn-outline-secondary:active {
+//     color: $light;
+// }
 .project-card:hover {
     cursor: pointer;
     box-shadow: #050505 10px 10px;
