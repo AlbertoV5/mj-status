@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 
 interface ProjectCardProps {
     date: Date
@@ -6,10 +6,11 @@ interface ProjectCardProps {
     tags: string[]
     summary: string
     link: string
-    thumbnail: string
+    thumbnail?: string
+    children: React.ReactNode
 }
 
-export const ProjectCard = ({date, title, tags, summary, link, thumbnail}: ProjectCardProps) => {
+export const ProjectCard = ({date, title, tags, summary, link, thumbnail, children}: ProjectCardProps) => {
     return (
         <a href={link} style={{textDecoration: "none"}}>
             <section className="card text-bg-dark shadow hstack gap-2">
@@ -18,6 +19,7 @@ export const ProjectCard = ({date, title, tags, summary, link, thumbnail}: Proje
                     style={{width: "200px", height: "200px", overflow: "hidden"}}
                 >
                     <img src={thumbnail} className="card-img-top" alt={title}/>
+                    {/* {children} */}
                 </section>
                 <section className="card-body col-6 d-flex flex-column justify-content-center">
                     <h3 className="card-title project-card-title">{title}</h3>

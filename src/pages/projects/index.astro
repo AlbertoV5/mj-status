@@ -4,6 +4,7 @@ import { ProjectCard } from "../../components/global/ProjectCard";
 import { getCollection } from 'astro:content';
 
 const projects = await getCollection('projects');
+const IMAGE_PATH = "/images/projects";
 ---
 <Layout title={'Projects'}>
 	<main class="container-fluid">
@@ -23,13 +24,14 @@ const projects = await getCollection('projects');
 			<aside class="col-md-2"></aside>
 			<section class="col-md-8">
 				<ul class="list-group">
-					{projects.map(project => (
+					{projects.map((project, i) => (
 						<li class="list-group-item list-group-item-dark border-0 project-wrapper" style="padding: 1px;">
 							<ProjectCard
 								{...project.data}
 								link={`projects/${project.slug}`}
-								thumbnail={`/src/images/projects/${project.data.thumbnail}`}
-							/>
+								thumbnail={`${IMAGE_PATH}/${project.data.thumbnail}`}
+							>
+							</ProjectCard>
 						</li>
 					))}
 				</ul>
