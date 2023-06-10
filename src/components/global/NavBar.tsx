@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { HomeButton, ProjectsButton, ArticlesButton, ThemeButton } from './Buttons'
 
 const Buttons = ({mobile=false}: {mobile?: boolean}) => (

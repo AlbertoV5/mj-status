@@ -1,14 +1,14 @@
 // Packages
 import { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import type { ScaleTime, ValueFn, Selection } from "d3";
+import { scaleLinear, scaleTime } from "d3-scale";
 import { select } from "d3-selection";
 import { area } from "d3-shape";
-import { scaleLinear, scaleTime } from "d3-scale";
 import { curveBasis } from "d3";
-import type { ScaleTime, ValueFn, Selection } from "d3";
 // Local
-import * as utils from "./utils"
-import { Selector } from "./components/Selector";
 import { ChartBase, LayoutXAxis, LayoutYAxis} from "./components/ChartLayout";
+import { Selector } from "./components/Selector";
+import * as utils from "./utils"
 // Hooks
 import useWindowDimensions from "./utils/useWindowDimensions";
 
@@ -24,13 +24,6 @@ const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
 const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
 const min15 = 15 * 60000;
 
-// utils
-const getTime = () => {
-    const utc = new Date().getTimezoneOffset() * 60000;
-    const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
-    const now = new Date().getTime();
-    return (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
-}
 // shapes
 const LocatorLine = ({svgRef, xAxis, y2}: {svgRef: React.RefObject<SVGSVGElement>, xAxis: ScaleTime<number, number>, y2: number}) => {
     const drawShape = (time: number) => {
@@ -50,11 +43,17 @@ const LocatorLine = ({svgRef, xAxis, y2}: {svgRef: React.RefObject<SVGSVGElement
             .style("stroke-width", STROKE_WIDTH)
         ;
     }
+    const getTime = () => {
+        const utc = new Date().getTimezoneOffset() * 60000;
+        const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
+        const now = new Date().getTime();
+        return (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
+    }
     useEffect(() => {
         if (!svgRef.current) return;
         drawShape(getTime());
         // Update svg every x minutes
-        const intervalId = window.setInterval(() => drawShape(getTime()), 15 * 60000);
+        const intervalId = window.setInterval(() => drawShape(getTime()), 15 * 60 * 1000);
         return () => clearInterval(intervalId);
     }, [])
     return (
