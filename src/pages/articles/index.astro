@@ -1,11 +1,11 @@
 ---
+import CollectionIndex from "../../components/global/CollectionIndex";
 import Layout from "../../layouts/Layout.astro";
 import { getCollection } from 'astro:content';
-import CollectionIndex from "../../components/global/CollectionIndex";
 
 const entries = await getCollection('articles');
 const title = "Articles";
-const description = "Technical and non-technical articles about web dev and data analytics.";
+const description = "Learn about concepts and tools for data analytics and web development.";
 ---
 <Layout title={title}>
 	<main class="container-fluid">
