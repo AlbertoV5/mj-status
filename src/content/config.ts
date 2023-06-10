@@ -4,8 +4,10 @@ const articlesCollection = defineCollection({
     type: 'content',
     schema: z.object({
         title: z.string(),
+        summary: z.string(),
         tags: z.array(z.string()),
-        image: z.string().optional(),
+        thumbnail: z.string(),
+        date: z.date(),
     }),
 });
 const projectsCollection = defineCollection({
@@ -22,3 +24,15 @@ export const collections = {
     'articles': articlesCollection,
     'projects': projectsCollection
 };
+
+export interface EntryData {
+    date: Date
+    title: string
+    tags: string[]
+    summary: string
+    thumbnail: string
+}
+export interface Entry {
+    slug: string
+    data: EntryData
+}

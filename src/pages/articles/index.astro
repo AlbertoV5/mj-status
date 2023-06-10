@@ -1,13 +1,19 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import { getCollection } from 'astro:content';
+import CollectionIndex from "../../components/global/CollectionIndex";
+
+const entries = await getCollection('articles');
+const title = "Articles";
+const description = "Technical and non-technical articles about web dev and data analytics.";
 ---
-<Layout title={'Blog'}>
-	<main class="container-fluid pt-4">
-		<section class="row">
-			<aside class="col-md-3"></aside>
-			<section class="col-md-6">
-			</section>
-			<aside class="col-md-3"></aside>
-		</section>
+<Layout title={title}>
+	<main class="container-fluid">
+		<CollectionIndex
+			title={title}
+			description={description}
+			slugBase={"articles"}
+			entries={entries}
+		/>
 	</main>
 </Layout>

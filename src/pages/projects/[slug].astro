@@ -18,6 +18,14 @@ interface Props {
 const { project } = Astro.props;
 const { Content } = await project.render();
 ---
+<style is:inline>
+	h1 {
+		text-align: center;
+	}
+	h1 + p {
+		text-align: center;
+	}
+</style>
 <Project title={project.data.title}>
 	<main class="container-fluid pt-4">
 		<Content/>

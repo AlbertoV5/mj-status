@@ -1,49 +1,63 @@
+// Packages
 import { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import { select } from "d3-selection";
-import { line, area } from "d3-shape";
+import type { ScaleTime, ValueFn, Selection } from "d3";
 import { scaleLinear, scaleTime } from "d3-scale";
-import { axisBottom, axisLeft, curveBasis, timeFormat } from "d3";
-import type { ScaleLinear, ScaleTime, ValueFn, Selection } from "d3";
-
-// import { getChartData, Key, colors, keyLabels, loadSelected, storeSelected } from "./utils";
-import * as utils from "./utils"
-import { Selector } from "./components/Selector";
+import { select } from "d3-selection";
+import { area } from "d3-shape";
+import { curveBasis } from "d3";
+// Local
 import { ChartBase, LayoutXAxis, LayoutYAxis} from "./components/ChartLayout";
-
+import { Selector } from "./components/Selector";
+import * as utils from "./utils"
+// Hooks
 import useWindowDimensions from "./utils/useWindowDimensions";
 
+// Constants
+const Y_LIMIT = 16;
+const STROKE_WIDTH = 2;
+const X_INTERVAL = 15 * 60 * 1000;
+const margins = {top: 30, right: 20, bottom: 30, left: 20};
+const dimensionsRatio = {w: 0.98, h: 0.6}
+// Datetime
+const utc = new Date().getTimezoneOffset() * 60000;
+const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
+const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
+const min15 = 15 * 60000;
 
-const getTime = () => {
-    const utc = new Date().getTimezoneOffset() * 60000;
-    const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
-    const now = new Date().getTime();
-    return (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
-}
-
-const LocatorLine = ({svgRef, xAxis, y2}: {svgRef: React.RefObject<SVGLineElement>, xAxis: ScaleTime<number, number>, y2: number}) => {
-    // Relative Time
-    const drawLine = (time: number, color: string) => {
-        select(svgRef.current)
-            .attr("x1", xAxis(time))
+// shapes
+const LocatorLine = ({svgRef, xAxis, y2}: {svgRef: React.RefObject<SVGSVGElement>, xAxis: ScaleTime<number, number>, y2: number}) => {
+    const drawShape = (time: number) => {
+        const x = xAxis(Math.trunc(time / min15) * min15);
+        select(svgRef.current).append("line")
+            .attr("x1", x)
+            .attr("x2", x)
             .attr("y1", 0)
-            .attr("x2", xAxis(time))
             .attr("y2", y2)
-            .style("stroke-width", STROKE_WIDTH)
-            .style("stroke", color)
-            .style("stroke-dasharray", 5)
-            .style("opacity", 0.7)
+            // .attr("width", 8)
+            .attr("height", y2)
+            // .style("fill", "currentColor")
             .style("fill", "none")
+            .style("opacity", 0.7)
+            .style("stroke", "currentColor")
+            .style("stroke-dasharray", 5)
+            .style("stroke-width", STROKE_WIDTH)
         ;
+    }
+    const getTime = () => {
+        const utc = new Date().getTimezoneOffset() * 60000;
+        const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
+        const now = new Date().getTime();
+        return (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
     }
     useEffect(() => {
         if (!svgRef.current) return;
-        drawLine(getTime(), "#fff");
-        // Update Line Every 15 minutes
-        const intervalId = window.setInterval(() => drawLine(getTime(), "#fff"), 15 * 60000);
+        drawShape(getTime());
+        // Update svg every x minutes
+        const intervalId = window.setInterval(() => drawShape(getTime()), 15 * 60 * 1000);
         return () => clearInterval(intervalId);
     }, [])
     return (
-        <line ref={svgRef}></line>
+        <svg ref={svgRef}></svg>
     )
 }
 
@@ -63,22 +77,11 @@ const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
     return yAxis;
 }
 
-// Constants
-const Y_LIMIT = 16;
-const STROKE_WIDTH = 2;
-const X_INTERVAL = 15 * 60 * 1000;
-// Datetime
-const utc = new Date().getTimezoneOffset() * 60000;
-const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
-const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
-// mutable
-const svgGroups: Record<string, Selection<SVGGElement, unknown, null, undefined> | undefined> = utils.keyLabels.reduce((prev, item) => ({...prev, [item.key]: undefined}), {} as Record<string, undefined>);
-
 export default function Chart() {
     // Plot a linear + scatter chart.
     // https://observablehq.com/@d3/d3-line-chart
     const svgRef = useRef<SVGSVGElement>(null);
-    const lineRef = useRef<SVGLineElement>(null);
+    const lineRef = useRef<SVGSVGElement>(null);
     // State for data from request.
     const [chartData, setChartData] = useState<Record<string, number[]> | undefined>(undefined);
     const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => utils.keyLabels.map(({key}) => ({key: key, sel: true})));
@@ -89,8 +92,16 @@ export default function Chart() {
     ));
     // Dimensions (client-side).
     const {width, height} = useWindowDimensions();
-    const margin = {top: 30, right: height > width ? 20 : 40, bottom: 30, left: height > width ? 20 : 40};
-    const dimensions = {width: (width * 0.98) - margin.left - margin.right, height: height * 0.6 - margin.top - margin.bottom}
+    const margin = {
+        top: margins.top, 
+        right: height > width ? margins.right : margins.right * 2, 
+        bottom: margins.bottom, 
+        left: height > width ? margins.left : margins.left * 2
+    };
+    const dimensions = {
+        width: (width * dimensionsRatio.w) - margin.left - margin.right, 
+        height: (height * dimensionsRatio.h) - margin.top - margin.bottom
+    }
     // Axis.
     const xAxis = getXAxis(startOfYesterday, startOfToday, dimensions);
     const yAxis = getYAxis(Y_LIMIT, dimensions);
@@ -136,11 +147,11 @@ export default function Chart() {
             ;
            const tooltip = select("body")
                 .append("div")
-                .attr("class", "bg-dark")
                 .style("opacity", 0)
                 .style("position", "absolute")
                 .style("padding", "10px")
                 .style("pointer-events", "none")
+                .style("background-color", "inherit")
             ;
             // Scatter plot.
             svgGroup.append("g")
@@ -166,7 +177,7 @@ export default function Chart() {
                     tooltip.html(tooltipContent)
                         .style("left", `${event.pageX - 48}px`)
                         .style("top", `${event.pageY - 96}px`)
-                        .style("border", `1px solid ${utils.colors[key as utils.Key]}cc`)
+                        .style("border", `1px solid ${utils.colors[key as utils.Key]}`)
                         .style("opacity", 1.0);
                 })
                 .on("mouseout", () => {
@@ -180,6 +191,7 @@ export default function Chart() {
         }
     }, [chartData])
 
+    // Interactive selected chart.
     useEffect(() => {
         if (!selected) return;
         selected.forEach(({key, sel}) => {
