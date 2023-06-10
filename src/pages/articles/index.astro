@@ -1,7 +1,7 @@
 ---
-import CollectionIndex from "../../components/global/CollectionIndex";
+import CollectionIndex from "../../components/global/CollectionIndex.astro";
 import Layout from "../../layouts/Layout.astro";
-import { getCollection } from 'astro:content';
+import { getCollection } from "astro:content"
 
 const entries = await getCollection('articles');
 const title = "Articles";

@@ -4,8 +4,8 @@ const articlesCollection = defineCollection({
     type: 'content',
     schema: z.object({
         title: z.string(),
-        summary: z.string(),
-        tags: z.array(z.string()),
+        summary: z.string().max(150),
+        tags: z.array(z.string().toLowerCase()).max(5),
         thumbnail: z.string(),
         date: z.date(),
     }),
@@ -15,7 +15,7 @@ const projectsCollection = defineCollection({
     schema: z.object({
         title: z.string(),
         summary: z.string().max(150),
-        tags: z.array(z.string()).max(5),
+        tags: z.array(z.string().toLowerCase()).max(5),
         thumbnail: z.string(),
         date: z.date(),
     }),
