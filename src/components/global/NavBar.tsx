@@ -1,14 +1,15 @@
-import { HomeButton, ProjectsButton, ArticlesButton, ThemeButton } from './Buttons'
+import * as button from './Buttons';
 
 const Buttons = ({mobile=false}: {mobile?: boolean}) => (
     <section className={`container-fluid ${mobile ? 'd-flex d-md-none' : 'd-none d-md-flex'} justify-content-between`}>
         <section className="hstack gap-1">
-            <HomeButton></HomeButton>
-            <ThemeButton></ThemeButton>
+            <button.HomeButton></button.HomeButton>
+            <button.ArticlesButton></button.ArticlesButton>
+            <button.ProjectsButton></button.ProjectsButton>
         </section>
         <section className="hstack gap-1">
-            <ArticlesButton></ArticlesButton>
-            <ProjectsButton></ProjectsButton>
+            <button.ThemeButton></button.ThemeButton>
+            <button.ContactButton></button.ContactButton>
         </section>
     </section>
 )
