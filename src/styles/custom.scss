@@ -54,7 +54,7 @@ $color-mode-type: data;
     // transition: 0.5s ease;
 }
 .project-wrapper:hover {
-	background: linear-gradient(45deg, $primary, #a4d4e2, $secondary, $primary);
+	background: linear-gradient(45deg, $primary, #a4d4e2, #018bb5, $primary);
 	background-size: 200% 200%;
 	// animation: gradient 10s ease-in-out infinite;
     // transition: 0.5s ease;
@@ -72,10 +72,6 @@ $color-mode-type: data;
 	100% {
 		background-position: 100% 50%;
 	}
-}
-.project-card-title {
-    // font-family: 'Montserrat', 'Courier New', Courier, monospace;
-    font-size: x-large;
 }
 @keyframes gradient {
 	0% {

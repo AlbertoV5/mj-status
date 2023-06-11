@@ -2,6 +2,7 @@
 import '../styles/custom.scss';
 import { NavBar } from "../components/global/NavBar";
 import { Footer } from "../components/global/Footer";
+import Fuse from 'fuse.js';
 
 export interface Props {
 	title: string;
@@ -17,6 +18,7 @@ const { title } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<script src="bootstrap/dist/js/bootstrap.bundle.min.js?url" />
 		<script src="../scripts/bsTheme.js"/>
+		<script src="fuse.js/dist/fuse.js"/>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
@@ -27,4 +29,12 @@ const { title } = Astro.props;
 		<slot />
 		<Footer client:load></Footer>
 	</body>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-PP5FDXN228"></script>
+		<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-PP5FDXN228');
+	</script>
 </html>

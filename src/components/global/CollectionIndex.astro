@@ -1,0 +1,54 @@
+---
+import { EntryCard } from './EntryCard'
+import type { Entry } from "../../content/config"
+import Search from './Search'
+
+interface Props {
+    title: string
+    description: string
+    entries: Entry[]
+	slugBase: string
+}
+const {title, description, entries, slugBase} = Astro.props;
+const tags: string[] = entries.reduce((acc, entry) => {
+    return acc.concat(entry.data.tags);
+}, [] as string[]);
+---
+<script>
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+    console.log('params', params);
+</script>
+<>
+    <section class="row pt-4">
+        <section class="col-md-12">
+            <header class="vstack gap-2 text-center">
+                <h1>{title}</h1>
+                <p>{description}</p>
+            </header>
+        </section>
+    </section>
+    <section class="row">
+        <section class="col-md-3 px-4 vstack gap-2">
+            <h2 style={{fontSize: "1.5rem"}}>Table of Contents</h2>
+            <Search items={tags} client:load/>
+        </section>
+        <section class="col-md-6">
+            <ul class="list-group pt-4">
+                {entries.map(entry => (
+                    <li 
+                        class="list-group-item btn btn-outline-primary border-0 text-start"
+                        style={{padding: "2px"}}
+                    >
+                        <EntryCard
+                            data={entry.data}
+                            slug={`${slugBase}/${entry.slug}`}
+			                client:visible
+                        />
+                    </li>
+                ))}
+            </ul>
+        </section>
+        <aside class="col-md-3"></aside>
+    </section>
+</>

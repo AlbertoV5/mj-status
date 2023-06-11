@@ -13,25 +13,27 @@ const CollectionIndex = ({title, description, entries, slugBase}: CollectionInde
         <>
 			<section className="row pt-4">
 				<section className="col-md-12">
-					<header className="vstack gap-3 text-center">
-						<section className="hstack gap-2 d-flex justify-content-center">
-							<h1>{title}</h1>
-						</section>
+					<header className="vstack gap-2 text-center">
+						<h1>{title}</h1>
 						<p>{description}</p>
-						<section className="hstack gap-2 d-flex justify-content-center">
-						</section>
 					</header>
 				</section>
 			</section>
-			<section className="row pt-2">
-				<aside className="col-md-2"></aside>
-				<section className="col-md-8">
-					<ul className="list-group">
+			<section className="row">
+				<section className="col-md-3 px-4 vstack gap-2">
+					<h2 style={{fontSize: "1.5rem"}}>Table of Contents</h2>
+					<div className="input-group mb-3">
+						<span className="input-group-text" id="basic-addon1">Tags</span>
+						<input type="text" className="form-control" placeholder="search"/>
+					</div>
+				</section>
+				<section className="col-md-6">
+					<ul className="list-group pt-4">
 						{entries.map(entry => (
 							<li 
 								key={entry.slug}
-								className="list-group-item list-group-item-dark border-0 project-wrapper" 
-								style={{padding: "1px"}}
+								className="list-group-item btn btn-outline-primary border-0 text-start"
+								style={{padding: "2px"}}
 							>
 								<EntryCard
 									data={entry.data}
@@ -41,7 +43,7 @@ const CollectionIndex = ({title, description, entries, slugBase}: CollectionInde
 						))}
 					</ul>
 				</section>
-				<aside className="col-md-2"></aside>
+				<aside className="col-md-3"></aside>
 			</section>
         </>
     )
