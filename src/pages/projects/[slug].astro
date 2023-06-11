@@ -1,6 +1,5 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import Project from "../../layouts/Project.astro"
 import { CollectionEntry, getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -26,8 +25,8 @@ const { Content } = await project.render();
 		text-align: center;
 	}
 </style>
-<Project title={project.data.title}>
+<Layout title={project.data.title}>
 	<main class="container-fluid pt-4">
 		<Content/>
 	</main>
-</Project>
+</Layout>
