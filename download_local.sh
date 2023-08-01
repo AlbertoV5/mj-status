@@ -1,1 +1,1 @@
-aws s3 sync s3://$MJ_STATUS_BUCKET/metrics ./public/metrics
+aws s3 sync s3://$MJ_STATUS_BUCKET/metrics ./public/metrics --profile og

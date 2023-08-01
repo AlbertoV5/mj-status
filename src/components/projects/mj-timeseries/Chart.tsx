@@ -1,117 +1,62 @@
 // Packages
+import { ChartBase, LayoutXAxis, LayoutYAxis} from "./components/ChartLayout";
 import { useEffect, useState, useRef, useLayoutEffect } from 'react';
-import type { ScaleTime, ValueFn, Selection } from "d3";
-import { scaleLinear, scaleTime } from "d3-scale";
+import useWindowDimensions from "./utils/useWindowDimensions";
+import type { ValueFn, Selection } from "d3";
+import { Selector } from "./components/Selector";
 import { select } from "d3-selection";
 import { area } from "d3-shape";
 import { curveBasis } from "d3";
-// Local
-import { ChartBase, LayoutXAxis, LayoutYAxis} from "./components/ChartLayout";
-import { Selector } from "./components/Selector";
-import * as utils from "./utils"
-// Hooks
-import useWindowDimensions from "./utils/useWindowDimensions";
+import * as utils from "./utils";
+import type { Key } from "./utils";
+import { keyLabels } from "./utils";
+import { getXAxis, getYAxis } from "./utils/axis";
+import { CHART_Y_LIMIT, CHART_STROKE_WIDTH, CHART_MARGINS, CHART_DIMENSIONS, DT_TODAY, DT_YESTERDAY, DT_15MIN } from './constants';
+import { LocatorLine } from "./components/LocatorLine";
 
-// Constants
-const Y_LIMIT = 16;
-const STROKE_WIDTH = 2;
-const X_INTERVAL = 15 * 60 * 1000;
-const margins = {top: 30, right: 20, bottom: 30, left: 20};
-const dimensionsRatio = {w: 0.98, h: 0.6}
-// Datetime
-const utc = new Date().getTimezoneOffset() * 60000;
-const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
-const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
-const min15 = 15 * 60000;
-
-// shapes
-const LocatorLine = ({svgRef, xAxis, y2}: {svgRef: React.RefObject<SVGSVGElement>, xAxis: ScaleTime<number, number>, y2: number}) => {
-    const drawShape = (time: number) => {
-        const x = xAxis(Math.trunc(time / min15) * min15);
-        select(svgRef.current).append("line")
-            .attr("x1", x)
-            .attr("x2", x)
-            .attr("y1", 0)
-            .attr("y2", y2)
-            // .attr("width", 8)
-            .attr("height", y2)
-            // .style("fill", "currentColor")
-            .style("fill", "none")
-            .style("opacity", 0.7)
-            .style("stroke", "currentColor")
-            .style("stroke-dasharray", 5)
-            .style("stroke-width", STROKE_WIDTH)
-        ;
-    }
-    const getTime = () => {
-        const utc = new Date().getTimezoneOffset() * 60000;
-        const startOfToday = new Date().setHours(0, 0, 0, 0) - utc;
-        const now = new Date().getTime();
-        return (startOfToday - 24 * 60 * 60 * 1000) + (now % (24 * 60 * 60 * 1000));
-    }
-    useEffect(() => {
-        if (!svgRef.current) return;
-        drawShape(getTime());
-        // Update svg every x minutes
-        const intervalId = window.setInterval(() => drawShape(getTime()), 15 * 60 * 1000);
-        return () => clearInterval(intervalId);
-    }, [])
-    return (
-        <svg ref={svgRef}></svg>
-    )
-}
-
-const getXAxis = (yesterday: number, today: number, dimensions: {width: number, height: number}) => {
-    const xAxis = scaleTime()
-        .domain([yesterday, today])
-        .range([ 0, dimensions.width ])
-    ;
-    return xAxis;
-}
-
-const getYAxis = (max: number, dimensions: {width: number, height: number}) => {
-    const yAxis = scaleLinear()
-        .domain( [0, max] )
-        .range([ dimensions.height, 0 ])
-    ;
-    return yAxis;
-}
+type chartData = Record<Key, number[]>;
+type selectedData = {key:Key, sel: boolean};
+// Q: best name?
+type svgGroupType = Selection<SVGGElement, unknown, null, undefined>;
+type svgGroupData = Record<Key, svgGroupType | undefined>;
+type datesData = {yesterday: string | undefined, today: string | undefined,  kind: string | undefined};
 
 export default function Chart() {
-    // Plot a linear + scatter chart.
     // https://observablehq.com/@d3/d3-line-chart
     const svgRef = useRef<SVGSVGElement>(null);
     const lineRef = useRef<SVGSVGElement>(null);
-    // State for data from request.
-    const [chartData, setChartData] = useState<Record<string, number[]> | undefined>(undefined);
-    const [selected, setSelected] = useState<{key:string, sel: boolean}[]>(() => utils.keyLabels.map(({key}) => ({key: key, sel: true})));
-    const [dates, setDates] = useState<{yesterday: string | undefined, today: string | undefined,  kind: string | undefined}>({yesterday: undefined, today: undefined, kind: undefined});
-    // Store groups for each category.
-    const [svgGroups, setSvgGroups] = useState<Record<string, Selection<SVGGElement, unknown, null, undefined> | undefined>>(() => (
-        utils.keyLabels.reduce((prev, item) => ({...prev, [item.key]: undefined}), {} as Record<string, undefined>)
+    const [chartData, setChartData] = useState<chartData | undefined>(undefined);
+    const [selected, setSelected] = useState<selectedData[]>(() => keyLabels.map(({key}) => ({key, sel: true})));
+    const [dates, setDates] = useState<datesData>({yesterday: undefined, today: undefined, kind: undefined});
+    const [svgGroups, setSvgGroups] = useState<svgGroupData>(() => (
+        // Q: best way to use reduce with types?
+        keyLabels.reduce((prev, item) => ({...prev, [item.key]: undefined}), {} as Record<Key, undefined>)
     ));
-    // Dimensions (client-side).
     const {width, height} = useWindowDimensions();
     const margin = {
-        top: margins.top, 
-        right: height > width ? margins.right : margins.right * 2, 
-        bottom: margins.bottom, 
-        left: height > width ? margins.left : margins.left * 2
+        top: CHART_MARGINS.top, 
+        right: height > width ? CHART_MARGINS.right : CHART_MARGINS.right * 2, 
+        bottom: CHART_MARGINS.bottom, 
+        left: height > width ? CHART_MARGINS.left : CHART_MARGINS.left * 2
     };
     const dimensions = {
-        width: (width * dimensionsRatio.w) - margin.left - margin.right, 
-        height: (height * dimensionsRatio.h) - margin.top - margin.bottom
+        width: (width * CHART_DIMENSIONS.w) - margin.left - margin.right, 
+        height: (height * CHART_DIMENSIONS.h) - margin.top - margin.bottom
     }
-    // Axis.
-    const xAxis = getXAxis(startOfYesterday, startOfToday, dimensions);
-    const yAxis = getYAxis(Y_LIMIT, dimensions);
-    // on Load (client-side).
+    const xAxis = getXAxis(DT_TODAY, DT_YESTERDAY, dimensions);
+    const yAxis = getYAxis(CHART_Y_LIMIT, dimensions);
+    const handleLoadSelected = () => {
+        // Q: TypeGuard for Literals?
+        const sel = utils.loadSelected() as selectedData[];
+        const computeDefault = () => keyLabels.map(({key}, i) => ({key, sel: i > 3 ? true : false}));
+        return sel || computeDefault();
+    }
     useEffect(() => {
         utils.getChartData()
         .then(({data, yesterday, today, kind}) => {
             setChartData(data);
             setDates({yesterday, today, kind});
-            setSelected(prev => utils.loadSelected() || utils.keyLabels.map(({key}, i) => ({key, sel: i > 3 ? true : false})));
+            setSelected(prev => handleLoadSelected());
         });
     }, []);
     // Layout Effect.
@@ -120,9 +65,8 @@ export default function Chart() {
         const groups = svgGroups;
         const svg = select(svgRef.current);
         selected.forEach(({key, sel}) => {
-            // create [x, y] data
             const rightPad = chartData[key][0];
-            const data = [...chartData[key], rightPad].map((value, i) => ([startOfYesterday + (i * X_INTERVAL), value]));
+            const data = [...chartData[key], rightPad].map((value, i) => ([DT_YESTERDAY + (i * DT_15MIN), value]));
             // Create group, initially hidden and disabled.
             const svgGroup = svg.append("g")
                 .style("opacity", "0")
@@ -135,14 +79,14 @@ export default function Chart() {
                 .attr("fill", utils.colors[key as utils.Key])
                 .attr("fill-opacity", 0.2)
                 .attr("stroke", utils.colors[key as utils.Key])
-                .attr("stroke-width", STROKE_WIDTH)
+                .attr("stroke-width", CHART_STROKE_WIDTH)
                 .style("pointer-events", "none")
                 .attr("d",
                     area()
                         .curve(curveBasis)
                         .x(([x, y]) => xAxis(x))
                         .y0(dimensions.height)
-                        .y1(([x, y]) => yAxis(Math.min(y, Y_LIMIT))) as ValueFn<SVGPathElement, number[][], any>
+                        .y1(([x, y]) => yAxis(Math.min(y, CHART_Y_LIMIT))) as ValueFn<SVGPathElement, number[][], any>
                 )
             ;
            const tooltip = select("body")
@@ -159,19 +103,17 @@ export default function Chart() {
                 .data(data)
                 .join("circle")
                 .attr("cx", ([x, y]) => xAxis(x))
-                .attr("cy", ([x, y]) => yAxis(Math.min(y, Y_LIMIT)))
+                .attr("cy", ([x, y]) => yAxis(Math.min(y, CHART_Y_LIMIT)))
                 .attr("r", 5)
-                // .attr("r", ([x, y]) => y > Y_LIMIT ? Math.min(10, 5 * y / Y_LIMIT) : 5)
                 .attr("fill", utils.colors[key as utils.Key])
                 .attr("stroke", "#111111")
-                // .attr("stroke", ([x, y]) => y > Y_LIMIT ? "#ffffff" : "#111111")
                 .style("stroke-width", 1)
                 .on("mouseover", (event: PointerEvent, d: any) => {
                     const hourMinutes = new Date(d[0]).toLocaleTimeString().replace(":00 ", " ");
                     const minutes = Math.trunc(d[1]);
                     const seconds = Math.trunc((d[1] - minutes) * 60).toFixed().padStart(2, '0');
                     const tooltipContent = `
-                        <b>${utils.keyLabels.find(({key: k}) => k === key)?.label}</b> @ ${hourMinutes}
+                        <b>${keyLabels.find(({key: k}) => k === key)?.label}</b> @ ${hourMinutes}
                         <br><b>Wait Time:</b> ${minutes.toFixed().padStart(2, '0')}:${seconds}
                     `;
                     tooltip.html(tooltipContent)
@@ -185,7 +127,6 @@ export default function Chart() {
                 })
             if (lineRef.current) select(lineRef.current).raise();
         })
-        // Update SVG Groups state.
         setSvgGroups(groups);
         return () => {
         }
@@ -204,7 +145,7 @@ export default function Chart() {
             if (lineRef.current) select(lineRef.current).raise();
         });
     }, [selected])
-
+    
     return (
         <section className='container-fluid'>
             <section className="row vstack gap-2">
@@ -223,7 +164,7 @@ export default function Chart() {
                 <Selector
                     selected={selected}
                     setSelected={setSelected}
-                    keyLabels={utils.keyLabels}
+                    keyLabels={keyLabels}
                     colors={utils.colors}
                     storeSelected={utils.storeSelected}
                 />

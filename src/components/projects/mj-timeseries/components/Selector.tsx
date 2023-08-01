@@ -2,9 +2,9 @@ import type React from 'react'
 import type { Key } from '../utils'
 
 interface SelectorProps {
-    selected: {key: string, sel: boolean}[]
-    setSelected: React.Dispatch<React.SetStateAction<{key: string, sel: boolean}[]>>
-    keyLabels: {key: string, label: string}[]
+    selected: {key: Key, sel: boolean}[]
+    setSelected: React.Dispatch<React.SetStateAction<{key: Key, sel: boolean}[]>>
+    keyLabels: {key: Key, label: string}[]
     colors: {[key: string]: string}
     storeSelected: (selected: {key: string, sel: boolean}[]) => void;
 }

@@ -1,0 +1,9 @@
+export const DT_24HRS = 24 * 60 * 60 * 1000;
+export const DT_15MIN = 15 * 60000;
+export const CHART_Y_LIMIT = 16;
+export const CHART_STROKE_WIDTH = 2;
+export const CHART_MARGINS = { top: 30, right: 20, bottom: 30, left: 20 };
+export const CHART_DIMENSIONS = { w: 0.98, h: 0.6 };
+const utc = new Date().getTimezoneOffset() * 60000;
+export const DT_TODAY = new Date().setHours(0, 0, 0, 0) - utc;
+export const DT_YESTERDAY = DT_TODAY - DT_24HRS;
