@@ -1,5 +1,5 @@
 import { SITE_PREFIX } from "../../../config";
-import { DT_24HRS } from "../constants";
+import { DT_24HRS, DATA_ROOT } from "../constants";
 
 export type PlotDatum = [number, number];
 export type Key =
@@ -48,17 +48,13 @@ const fetchData = async (path: string) => {
   }
   return undefined;
 };
-
 /** Returns data based on day offset. */
-export const getChartData = async (
-  path: string = "/metrics/relax",
-  offset: number = 1
-) => {
+export const getChartData = async (offset: number = 1) => {
   const startingTime = new Date().getTime() - DT_24HRS * (offset - 1);
   const endingTime = new Date().getTime() - DT_24HRS * offset;
   const today = new Date(startingTime).toISOString().split("T")[0];
   const yesterday = new Date(endingTime).toISOString().split("T")[0];
-  const data = await fetchData(`${path}/${yesterday}_${today}.json`);
+  const data = await fetchData(`${DATA_ROOT}/${yesterday}_${today}.json`);
   if (data)
     return {
       data: data,

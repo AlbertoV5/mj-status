@@ -7,3 +7,4 @@ export const CHART_DIMENSIONS = { w: 0.98, h: 0.6 };
 const utc = new Date().getTimezoneOffset() * 60000;
 export const DT_TODAY = new Date().setHours(0, 0, 0, 0) - utc;
 export const DT_YESTERDAY = DT_TODAY - DT_24HRS;
+export const DATA_ROOT = "/metrics/relax";

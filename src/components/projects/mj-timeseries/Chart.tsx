@@ -1,18 +1,17 @@
-// Packages
+import { CHART_Y_LIMIT, CHART_STROKE_WIDTH, CHART_MARGINS, CHART_DIMENSIONS, DT_TODAY, DT_YESTERDAY, DT_15MIN } from './constants';
 import { ChartBase, LayoutXAxis, LayoutYAxis} from "./components/ChartLayout";
 import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import useWindowDimensions from "./utils/useWindowDimensions";
-import type { ValueFn, Selection } from "d3";
+import { LocatorLine } from "./components/LocatorLine";
+import { getXAxis, getYAxis } from "./utils/axis";
 import { Selector } from "./components/Selector";
+import type { ValueFn, Selection } from "d3";
 import { select } from "d3-selection";
+import { keyLabels } from "./utils";
+import type { Key } from "./utils";
+import * as utils from "./utils";
 import { area } from "d3-shape";
 import { curveBasis } from "d3";
-import * as utils from "./utils";
-import type { Key } from "./utils";
-import { keyLabels } from "./utils";
-import { getXAxis, getYAxis } from "./utils/axis";
-import { CHART_Y_LIMIT, CHART_STROKE_WIDTH, CHART_MARGINS, CHART_DIMENSIONS, DT_TODAY, DT_YESTERDAY, DT_15MIN } from './constants';
-import { LocatorLine } from "./components/LocatorLine";
 
 type chartData = Record<Key, number[]>;
 type selectedData = {key:Key, sel: boolean};
@@ -20,6 +19,7 @@ type selectedData = {key:Key, sel: boolean};
 type svgGroupType = Selection<SVGGElement, unknown, null, undefined>;
 type svgGroupData = Record<Key, svgGroupType | undefined>;
 type datesData = {yesterday: string | undefined, today: string | undefined,  kind: string | undefined};
+type svgFunctionPath = ValueFn<SVGPathElement, number[][], any>;
 
 export default function Chart() {
     // https://observablehq.com/@d3/d3-line-chart
@@ -52,14 +52,13 @@ export default function Chart() {
         return sel || computeDefault();
     }
     useEffect(() => {
-        utils.getChartData()
+        utils.getChartData(1)
         .then(({data, yesterday, today, kind}) => {
             setChartData(data);
             setDates({yesterday, today, kind});
-            setSelected(prev => handleLoadSelected());
+            setSelected(handleLoadSelected);
         });
     }, []);
-    // Layout Effect.
     useLayoutEffect(() => {
         if (!svgRef.current || !chartData) return;
         const groups = svgGroups;
@@ -67,26 +66,24 @@ export default function Chart() {
         selected.forEach(({key, sel}) => {
             const rightPad = chartData[key][0];
             const data = [...chartData[key], rightPad].map((value, i) => ([DT_YESTERDAY + (i * DT_15MIN), value]));
-            // Create group, initially hidden and disabled.
             const svgGroup = svg.append("g")
                 .style("opacity", "0")
                 .style("pointer-events", "none")
             groups[key] = svgGroup;
-            // Add the area svg.
             svgGroup.append("path")
                 .data([data])
                 .attr("class", "area")
-                .attr("fill", utils.colors[key as utils.Key])
+                .attr("fill", utils.colors[key])
                 .attr("fill-opacity", 0.2)
-                .attr("stroke", utils.colors[key as utils.Key])
+                .attr("stroke", utils.colors[key])
                 .attr("stroke-width", CHART_STROKE_WIDTH)
                 .style("pointer-events", "none")
                 .attr("d",
                     area()
-                        .curve(curveBasis)
-                        .x(([x, y]) => xAxis(x))
-                        .y0(dimensions.height)
-                        .y1(([x, y]) => yAxis(Math.min(y, CHART_Y_LIMIT))) as ValueFn<SVGPathElement, number[][], any>
+                    .curve(curveBasis)
+                    .x(([x, y]) => xAxis(x))
+                    .y0(dimensions.height)
+                    .y1(([x, y]) => yAxis(Math.min(y, CHART_Y_LIMIT))) as svgFunctionPath
                 )
             ;
            const tooltip = select("body")
@@ -97,7 +94,6 @@ export default function Chart() {
                 .style("pointer-events", "none")
                 .style("background-color", "inherit")
             ;
-            // Scatter plot.
             svgGroup.append("g")
                 .selectAll("dot")
                 .data(data)
@@ -105,7 +101,7 @@ export default function Chart() {
                 .attr("cx", ([x, y]) => xAxis(x))
                 .attr("cy", ([x, y]) => yAxis(Math.min(y, CHART_Y_LIMIT)))
                 .attr("r", 5)
-                .attr("fill", utils.colors[key as utils.Key])
+                .attr("fill", utils.colors[key])
                 .attr("stroke", "#111111")
                 .style("stroke-width", 1)
                 .on("mouseover", (event: PointerEvent, d: any) => {
@@ -119,7 +115,7 @@ export default function Chart() {
                     tooltip.html(tooltipContent)
                         .style("left", `${event.pageX - 48}px`)
                         .style("top", `${event.pageY - 96}px`)
-                        .style("border", `1px solid ${utils.colors[key as utils.Key]}`)
+                        .style("border", `1px solid ${utils.colors[key]}`)
                         .style("opacity", 1.0);
                 })
                 .on("mouseout", () => {
@@ -131,12 +127,9 @@ export default function Chart() {
         return () => {
         }
     }, [chartData])
-
-    // Interactive selected chart.
     useEffect(() => {
         if (!selected) return;
         selected.forEach(({key, sel}) => {
-            // toggle visibility with a 400 ms fade effect
             svgGroups[key]?.transition("ease").duration(400)
                 .style("opacity", sel ? "1" : "0")
                 .style("pointer-events", sel ? "all" : "none")
@@ -145,7 +138,6 @@ export default function Chart() {
             if (lineRef.current) select(lineRef.current).raise();
         });
     }, [selected])
-    
     return (
         <section className='container-fluid'>
             <section className="row vstack gap-2">
